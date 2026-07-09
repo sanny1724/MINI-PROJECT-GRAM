@@ -1,9 +1,9 @@
-# Netlify Build and Deploy Configuration
-# Tells Netlify to build and publish the React App from the frontend sub-directory
+# Netlify Build and Deploy Configuration for GourmetTable
+# Tells Netlify to build and publish the React App from the restaurant-reservation/client sub-directory
 
 [build]
   # The directory where Netlify will run npm install and look for package.json
-  base = "frontend"
+  base = "restaurant-reservation/client"
 
   # The directory that Netlify will serve (relative to the base directory)
   publish = "dist"

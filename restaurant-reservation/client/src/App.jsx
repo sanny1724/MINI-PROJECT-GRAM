@@ -18,6 +18,8 @@ import Reservations from './pages/Reservations';
 import ManageTables from './pages/ManageTables';
 import Profile from './pages/Profile';
 import NotFound from './pages/NotFound';
+import Menu from './pages/Menu';
+import ManageMenu from './pages/ManageMenu';
 
 function App() {
   return (
@@ -31,6 +33,7 @@ function App() {
               <Route path="/" element={<Landing />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
+              <Route path="/menu" element={<Menu />} />
 
               {/* General Protected Routes */}
               <Route
@@ -72,6 +75,14 @@ function App() {
                 element={
                   <AdminRoute>
                     <ManageTables />
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="/admin/menu"
+                element={
+                  <AdminRoute>
+                    <ManageMenu />
                   </AdminRoute>
                 }
               />

@@ -8,6 +8,7 @@ import authRoutes from './routes/authRoutes.js';
 import tableRoutes from './routes/tableRoutes.js';
 import reservationRoutes from './routes/reservationRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
+import menuRoutes from './routes/menuRoutes.js';
 import errorHandler from './middlewares/error.js';
 
 const app = express();
@@ -49,6 +50,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/tables', tableRoutes);
 app.use('/api/reservations', reservationRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/menu', menuRoutes);
 
 // Health check / welcome endpoint
 app.get('/', (req, res) => {

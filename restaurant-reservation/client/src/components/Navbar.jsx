@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { Utensils, Menu, X, LogOut, User as UserIcon, Calendar, LayoutDashboard, Grid } from 'lucide-react';
+import { Utensils, Menu, X, LogOut, User as UserIcon, Calendar, LayoutDashboard, Grid, BookOpen } from 'lucide-react';
 
 const Navbar = () => {
   const { user, logout } = useAuth();
@@ -41,41 +41,52 @@ const Navbar = () => {
           </Link>
 
           {/* Desktop Navigation */}
-          {user && (
-            <div class="hidden md:flex items-center gap-6">
-              {user.role === 'admin' ? (
-                <>
-                  <Link to="/dashboard" class={linkClass('/dashboard')}>
-                    <LayoutDashboard class="h-4 w-4" />
-                    Admin Panel
-                  </Link>
-                  <Link to="/tables" class={linkClass('/tables')}>
-                    <Grid class="h-4 w-4" />
-                    Manage Tables
-                  </Link>
-                  <Link to="/reservations" class={linkClass('/reservations')}>
-                    <Calendar class="h-4 w-4" />
-                    All Bookings
-                  </Link>
-                </>
-              ) : (
-                <>
-                  <Link to="/dashboard" class={linkClass('/dashboard')}>
-                    <LayoutDashboard class="h-4 w-4" />
-                    Dashboard
-                  </Link>
-                  <Link to="/book" class={linkClass('/book')}>
-                    <Calendar class="h-4 w-4" />
-                    Book a Table
-                  </Link>
-                  <Link to="/reservations" class={linkClass('/reservations')}>
-                    <Calendar class="h-4 w-4" />
-                    My Bookings
-                  </Link>
-                </>
-              )}
-            </div>
-          )}
+          <div class="hidden md:flex items-center gap-6">
+            <Link to="/menu" class={linkClass('/menu')}>
+              <BookOpen class="h-4 w-4" />
+              Menu
+            </Link>
+
+            {user && (
+              <>
+                {user.role === 'admin' ? (
+                  <>
+                    <Link to="/dashboard" class={linkClass('/dashboard')}>
+                      <LayoutDashboard class="h-4 w-4" />
+                      Admin Panel
+                    </Link>
+                    <Link to="/tables" class={linkClass('/tables')}>
+                      <Grid class="h-4 w-4" />
+                      Manage Tables
+                    </Link>
+                    <Link to="/admin/menu" class={linkClass('/admin/menu')}>
+                      <BookOpen class="h-4 w-4" />
+                      Manage Menu
+                    </Link>
+                    <Link to="/reservations" class={linkClass('/reservations')}>
+                      <Calendar class="h-4 w-4" />
+                      All Bookings
+                    </Link>
+                  </>
+                ) : (
+                  <>
+                    <Link to="/dashboard" class={linkClass('/dashboard')}>
+                      <LayoutDashboard class="h-4 w-4" />
+                      Dashboard
+                    </Link>
+                    <Link to="/book" class={linkClass('/book')}>
+                      <Calendar class="h-4 w-4" />
+                      Book a Table
+                    </Link>
+                    <Link to="/reservations" class={linkClass('/reservations')}>
+                      <Calendar class="h-4 w-4" />
+                      My Bookings
+                    </Link>
+                  </>
+                )}
+              </>
+            )}
+          </div>
 
           {/* User Operations */}
           {user ? (
@@ -122,6 +133,14 @@ const Navbar = () => {
       {isOpen && (
         <div class="md:hidden border-t border-zinc-800/40 bg-zinc-950/95 backdrop-blur-lg">
           <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+            <Link
+              to="/menu"
+              onClick={() => setIsOpen(false)}
+              class="block px-3 py-2 rounded-md text-base font-medium text-zinc-300 hover:bg-zinc-900 hover:text-white"
+            >
+              Menu
+            </Link>
+
             {user ? (
               user.role === 'admin' ? (
                 <>
@@ -138,6 +157,13 @@ const Navbar = () => {
                     class="block px-3 py-2 rounded-md text-base font-medium text-zinc-300 hover:bg-zinc-900 hover:text-white"
                   >
                     Manage Tables
+                  </Link>
+                  <Link
+                    to="/admin/menu"
+                    onClick={() => setIsOpen(false)}
+                    class="block px-3 py-2 rounded-md text-base font-medium text-zinc-300 hover:bg-zinc-900 hover:text-white"
+                  >
+                    Manage Menu
                   </Link>
                   <Link
                     to="/reservations"

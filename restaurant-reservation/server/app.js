@@ -16,12 +16,14 @@ const app = express();
 // Set security HTTP headers
 app.use(helmet());
 
-// Enable CORS
-const corsOptions = {
-  origin: process.env.CLIENT_URL || 'http://localhost:5173',
-  optionsSuccessStatus: 200,
-};
-app.use(cors(corsOptions));
+// Enable CORS (dynamically reflects the request origin to prevent CORS blockages)
+app.use(
+  cors({
+    origin: true,
+    credentials: true,
+    optionsSuccessStatus: 200,
+  })
+);
 
 // Development logging
 if (process.env.NODE_ENV === 'development') {

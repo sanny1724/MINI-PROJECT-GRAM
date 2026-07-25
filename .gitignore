@@ -1,3 +1,7 @@
+# ===================================================
+# GRAM TELANGANA GOVERNANCE PLATFORM .GITIGNORE
+# ===================================================
+
 # Dependency directories
 node_modules/
 jspm_packages/

@@ -4,9 +4,7 @@ GRAM is a premium, state-of-the-art Government Digital Mission dashboard designe
 
 ---
 
-## 🔗 Live Deployments & Repository
-- **Live Frontend Web Client:** [https://taskwexaai.netlify.app/](https://taskwexaai.netlify.app/)
-- **Live Backend REST API:** [https://task-wexa-ai.onrender.com/](https://task-wexa-ai.onrender.com/)
+## 🔗 Repository
 - **GitHub Repository:** [https://github.com/sanny1724/MINI-PROJECT-GRAM.git](https://github.com/sanny1724/MINI-PROJECT-GRAM.git)
 
 ---

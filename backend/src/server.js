@@ -8,6 +8,7 @@ import authRoutes from './routes/auth.js';
 import productRoutes from './routes/products.js';
 import dashboardRoutes from './routes/dashboard.js';
 import settingsRoutes from './routes/settings.js';
+import lgdRoutes from './routes/lgd.js';
 import { seedDemoData } from './seed.js';
 
 // Load env variables
@@ -34,6 +35,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/settings', settingsRoutes);
+app.use('/api/lgd', lgdRoutes);
 
 // Health check endpoint
 app.get('/api/status', (req, res) => {

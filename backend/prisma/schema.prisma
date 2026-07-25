@@ -42,3 +42,107 @@ model Product {
 
   @@unique([organizationId, sku])
 }
+
+model State {
+  code      Int        @id
+  name      String
+  districts District[]
+}
+
+model District {
+  code      Int      @id
+  name      String
+  nameLocal String?
+  stateCode Int
+  state     State    @relation(fields: [stateCode], references: [code])
+  mandals   Mandal[]
+}
+
+model Mandal {
+  code         Int       @id
+  name         String
+  nameLocal    String?
+  districtCode Int
+  district     District  @relation(fields: [districtCode], references: [code])
+  villages     Village[]
+}
+
+model Village {
+  code       Int       @id
+  name       String
+  nameLocal  String?
+  mandalCode Int
+  mandal     Mandal    @relation(fields: [mandalCode], references: [code])
+  category   String?
+  status     String?
+
+  metrics    VillageMetric?
+  officials  VillageOfficial[]
+  schemes    VillageScheme[]
+  budgets    VillageBudget[]
+  grievances VillageGrievance[]
+}
+
+model VillageMetric {
+  villageCode      Int      @id
+  village          Village  @relation(fields: [villageCode], references: [code], onDelete: Cascade)
+  developmentScore Int
+  riskLevel        String
+  waterScore       Int
+  waterRisk        String
+  waterTrend       String
+  educationScore   Int
+  educationRisk    String
+  educationTrend   String
+  healthScore      Int
+  healthRisk       String
+  healthTrend      String
+  agricultureScore Int
+  agricultureRisk  String
+  agricultureTrend String
+  governanceScore  Int
+  governanceRisk   String
+  governanceTrend  String
+  lastUpdated      DateTime @default(now())
+}
+
+model VillageOfficial {
+  id          String  @id @default(uuid())
+  villageCode Int
+  village     Village @relation(fields: [villageCode], references: [code], onDelete: Cascade)
+  name        String
+  designation String
+  contact     String
+}
+
+model VillageScheme {
+  id              String  @id @default(uuid())
+  villageCode     Int
+  village     Village @relation(fields: [villageCode], references: [code], onDelete: Cascade)
+  name            String
+  allocatedBudget Float
+  spentBudget     Float
+  status          String
+}
+
+model VillageBudget {
+  id                  String  @id @default(uuid())
+  villageCode         Int
+  village             Village @relation(fields: [villageCode], references: [code], onDelete: Cascade)
+  year                String
+  totalAllocation     Float
+  totalSpent          Float
+  infrastructureAlloc Float
+  welfareAlloc        Float
+}
+
+model VillageGrievance {
+  id          String   @id @default(uuid())
+  villageCode Int
+  village     Village  @relation(fields: [villageCode], references: [code], onDelete: Cascade)
+  title       String
+  category    String
+  status      String
+  createdAt   DateTime @default(now())
+  description String
+}

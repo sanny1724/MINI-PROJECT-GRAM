@@ -9,6 +9,8 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Products from './pages/Products';
 import Settings from './pages/Settings';
+import LandingPage from './pages/LandingPage';
+import PublicDashboard from './pages/PublicDashboard';
 
 // Import Components
 import Layout from './components/Layout';
@@ -68,6 +70,10 @@ export default function App() {
     <BrowserRouter>
       <div className="relative">
         <Routes>
+          {/* Public Landing & Dashboard Paths */}
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/public/village/:villageCode" element={<PublicDashboard />} />
+
           {/* Public Auth Path */}
           <Route 
             path="/login" 
@@ -109,7 +115,7 @@ export default function App() {
           {/* Fallback Redirects */}
           <Route 
             path="*" 
-            element={<Navigate to={token ? "/dashboard" : "/login"} replace />} 
+            element={<Navigate to="/" replace />} 
           />
         </Routes>
 

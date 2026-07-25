@@ -7,56 +7,52 @@ const router = express.Router();
 
 router.use(authMiddleware);
 
-// GET /api/dashboard - Aggregate dashboard statistics
+// GET /api/dashboard - Aggregate dashboard statistics for officers
 router.get('/', async (req, res) => {
   try {
-    const organizationId = req.user.organizationId;
+    const lgdCode = req.user.lgdCode || 569005; // Default to Ankapur
+    const role = req.user.role || 'Panchayat';
 
-    // Fetch the organization to get the default threshold
-    const org = await prisma.organization.findUnique({
-      where: { id: organizationId },
-    });
+    // Fetch schemes and grievances for this village
+    const [schemes, grievances, metrics] = await Promise.all([
+      prisma.villageScheme.findMany({
+        where: { villageCode: lgdCode }
+      }),
+      prisma.villageGrievance.findMany({
+        where: { villageCode: lgdCode },
+        orderBy: { createdAt: 'desc' }
+      }),
+      prisma.villageMetric.findUnique({
+        where: { villageCode: lgdCode }
+      })
+    ]);
 
-    if (!org) {
-      return res.status(404).json({ error: 'Organization not found' });
-    }
+    // Aggregate statistics
+    // 1. Total Schemes
+    const totalSchemes = schemes.length;
+    
+    // 2. Total Budget Allocated (utilization)
+    const totalAllocation = schemes.reduce((sum, s) => sum + s.allocatedBudget, 0);
 
-    const defaultThreshold = org.defaultThreshold;
+    // 3. Pending Grievances Count
+    const pendingGrievances = grievances.filter(g => g.status !== 'Resolved');
+    const pendingCount = pendingGrievances.length;
 
-    // Fetch all products for the organization to perform calculations
-    const products = await prisma.product.findMany({
-      where: { organizationId },
-      orderBy: { updatedAt: 'desc' },
-    });
-
-    const totalProducts = products.length;
-    const totalInventoryUnits = products.reduce((sum, p) => sum + p.quantity, 0);
-
-    // Filter low stock items
-    const lowStockItems = products.filter(p => {
-      const threshold = p.lowStockThreshold !== null ? p.lowStockThreshold : defaultThreshold;
-      return p.quantity <= threshold;
-    });
-
-    const lowStockCount = lowStockItems.length;
-
-    // Return aggregated dashboard data
+    // Return mapped JSON to fit original dashboard structure
     return res.status(200).json({
-      totalProducts,
-      totalInventoryUnits,
-      lowStockCount,
-      defaultThreshold,
-      // Send the top 5 low stock products needing attention (sorted by quantity ascending)
-      lowStockAlerts: lowStockItems
-        .sort((a, b) => a.quantity - b.quantity)
-        .slice(0, 5)
-        .map(p => ({
-          id: p.id,
-          name: p.name,
-          sku: p.sku,
-          quantity: p.quantity,
-          threshold: p.lowStockThreshold !== null ? p.lowStockThreshold : defaultThreshold,
-        })),
+      totalProducts: totalSchemes, // Schemes Count
+      totalInventoryUnits: totalAllocation, // Total Budget Allocated (₹)
+      lowStockCount: pendingCount, // Pending Grievances count
+      developmentScore: metrics ? metrics.developmentScore : 87, // Custom addition
+      riskLevel: metrics ? metrics.riskLevel : 'LOW', // Custom addition
+      defaultThreshold: 0,
+      lowStockAlerts: pendingGrievances.slice(0, 5).map(g => ({
+        id: g.id,
+        name: g.title, // Grievance title
+        sku: g.category, // Category (Water, Health, etc.)
+        quantity: 0,
+        threshold: 0
+      }))
     });
   } catch (error) {
     console.error('Dashboard aggregation error:', error);

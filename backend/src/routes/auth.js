@@ -6,14 +6,14 @@ import prisma from '../prisma.js';
 
 const router = express.Router();
 
-// Signup Route: Register organization + user
+// Signup Route: Register officer
 router.post('/signup', async (req, res) => {
   try {
-    const { email, password, organizationName } = req.body;
+    const { email, password, role, lgdCode } = req.body;
 
     // Validation
-    if (!email || !password || !organizationName) {
-      return res.status(400).json({ error: 'Email, password, and organization name are required' });
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email and password are required' });
     }
 
     if (password.length < 6) {
@@ -32,30 +32,23 @@ router.post('/signup', async (req, res) => {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create organization and user atomically
-    const org = await prisma.organization.create({
+    // Create user/officer
+    const user = await prisma.user.create({
       data: {
-        name: organizationName,
-        users: {
-          create: {
-            email,
-            password: hashedPassword,
-          },
-        },
-      },
-      include: {
-        users: true,
-      },
+        email,
+        password: hashedPassword,
+        role: role || 'Panchayat',
+        lgdCode: lgdCode ? parseInt(lgdCode) : 569005 // Default to Ankapur
+      }
     });
-
-    const user = org.users[0];
 
     // Generate JWT token
     const token = jwt.sign(
       {
         id: user.id,
         email: user.email,
-        organizationId: org.id,
+        role: user.role,
+        lgdCode: user.lgdCode
       },
       process.env.JWT_SECRET || 'super-secret-jwt-key-12345',
       { expiresIn: '24h' }
@@ -66,8 +59,8 @@ router.post('/signup', async (req, res) => {
       user: {
         id: user.id,
         email: user.email,
-        organizationId: org.id,
-        organizationName: org.name,
+        role: user.role,
+        lgdCode: user.lgdCode
       },
     });
   } catch (error) {
@@ -87,8 +80,7 @@ router.post('/login', async (req, res) => {
 
     // Find user
     const user = await prisma.user.findUnique({
-      where: { email },
-      include: { organization: true },
+      where: { email }
     });
 
     if (!user) {
@@ -106,7 +98,8 @@ router.post('/login', async (req, res) => {
       {
         id: user.id,
         email: user.email,
-        organizationId: user.organizationId,
+        role: user.role,
+        lgdCode: user.lgdCode
       },
       process.env.JWT_SECRET || 'super-secret-jwt-key-12345',
       { expiresIn: '24h' }
@@ -117,8 +110,8 @@ router.post('/login', async (req, res) => {
       user: {
         id: user.id,
         email: user.email,
-        organizationId: user.organizationId,
-        organizationName: user.organization.name,
+        role: user.role,
+        lgdCode: user.lgdCode
       },
     });
   } catch (error) {

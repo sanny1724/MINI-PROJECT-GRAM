@@ -9,38 +9,13 @@ generator client {
   provider = "prisma-client-js"
 }
 
-model Organization {
-  id               String    @id @default(uuid())
-  name             String
-  defaultThreshold Int       @default(10)
-  createdAt        DateTime  @default(now())
-  users            User[]
-  products         Product[]
-}
-
 model User {
-  id             String       @id @default(uuid())
-  email          String       @unique
-  password       String
-  organizationId String
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-}
-
-model Product {
-  id                String       @id @default(uuid())
-  organizationId    String
-  organization      Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  name              String
-  sku               String
-  description       String?
-  quantity          Int          @default(0)
-  costPrice         Float        @default(0.0)
-  sellingPrice      Float        @default(0.0)
-  lowStockThreshold Int?         // Custom threshold override for this product. If null, use Organization.defaultThreshold.
-  createdAt         DateTime     @default(now())
-  updatedAt         DateTime     @updatedAt
-
-  @@unique([organizationId, sku])
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  role      String   @default("Panchayat") // Panchayat, Collector, StateAdmin
+  lgdCode   Int?     // LGD Code of the Village (Panchayat) or District (Collector)
+  createdAt DateTime @default(now())
 }
 
 model State {

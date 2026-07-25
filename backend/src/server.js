@@ -39,12 +39,12 @@ app.use('/api/lgd', lgdRoutes);
 
 // Health check endpoint
 app.get('/api/status', (req, res) => {
-  res.json({ status: 'running', service: 'StockFlow MVP API' });
+  res.json({ status: 'running', service: 'GRAM Telangana Governance API' });
 });
 
 // Root handler
 app.get('/', (req, res) => {
-  res.send('StockFlow MVP Backend API is running');
+  res.send('GRAM Telangana Governance Backend API is running');
 });
 
 // Global error handling middleware
@@ -55,7 +55,7 @@ app.use((err, req, res, next) => {
 
 app.listen(PORT, async () => {
   console.log(`===================================================`);
-  console.log(`🚀 StockFlow MVP Backend Server running!`);
+  console.log(`🚀 GRAM Telangana Governance Backend Server running!`);
   console.log(`   Local Server: http://localhost:${PORT}`);
   console.log(`===================================================`);
   

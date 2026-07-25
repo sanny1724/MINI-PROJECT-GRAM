@@ -1,12 +1,16 @@
 // src/pages/Dashboard.jsx
 import React, { useState, useEffect } from 'react';
 import { 
-  Boxes, 
-  Warehouse, 
+  FileText, 
+  DollarSign, 
   AlertTriangle, 
-  ArrowRightLeft, 
+  ArrowRight, 
   TrendingUp, 
-  Loader2 
+  Loader2,
+  Activity,
+  Compass,
+  CheckCircle2,
+  ShieldAlert
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
@@ -34,50 +38,49 @@ export default function Dashboard() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-full w-full">
-        <Loader2 className="animate-spin text-indigo-500" size={36} />
+      <div className="flex items-center justify-center h-full w-full bg-[#16241D]">
+        <Loader2 className="animate-spin text-[#C98A2E]" size={36} />
       </div>
     );
   }
 
   const kpis = [
     {
-      title: 'Total Products',
+      title: 'Active Welfare Schemes',
       value: data?.totalProducts || 0,
-      description: 'Unique catalog SKUs',
-      icon: Boxes,
-      glow: 'shadow-indigo-500/10 border-indigo-500/20',
-      iconBg: 'bg-indigo-500/10 text-indigo-400',
+      description: 'Active developmental schemes',
+      icon: FileText,
+      glow: 'shadow-[#C98A2E]/5 border-[#F2F0E6]/10',
+      iconBg: 'bg-[#C98A2E]/10 text-[#C98A2E]',
     },
     {
-      title: 'Total Inventory Units',
-      value: data?.totalInventoryUnits || 0,
-      description: 'In-stock aggregate items',
-      icon: Warehouse,
-      glow: 'shadow-cyan-500/10 border-cyan-500/20',
-      iconBg: 'bg-cyan-500/10 text-cyan-400',
+      title: 'Total Allocated Budget',
+      value: `₹ ${(data?.totalInventoryUnits / 100000 || 0).toFixed(1)} L`,
+      description: 'Aggregated funds allocated',
+      icon: DollarSign,
+      glow: 'shadow-[#C98A2E]/5 border-[#F2F0E6]/10',
+      iconBg: 'bg-[#C98A2E]/10 text-[#C98A2E]',
     },
     {
-      title: 'Low Stock Items',
+      title: 'Pending Citizen Grievances',
       value: data?.lowStockCount || 0,
-      description: 'Items below threshold limit',
+      description: 'Logged reports requiring resolution',
       icon: AlertTriangle,
-      glow: data?.lowStockCount > 0 ? 'shadow-red-500/20 border-red-500/30' : 'shadow-emerald-500/10 border-emerald-500/20',
-      iconBg: data?.lowStockCount > 0 ? 'bg-red-500/10 text-red-400' : 'bg-emerald-500/10 text-emerald-400',
-      badgeColor: data?.lowStockCount > 0 ? 'text-red-400 bg-red-500/10 border border-red-500/20' : 'text-emerald-400 bg-emerald-500/10 border border-emerald-500/20',
+      glow: data?.lowStockCount > 0 ? 'shadow-red-500/10 border-red-500/20' : 'shadow-emerald-500/5 border-[#F2F0E6]/10',
+      iconBg: data?.lowStockCount > 0 ? 'bg-red-500/10 text-red-400' : 'bg-emerald-500/10 text-green-400',
     },
   ];
 
   return (
-    <div className="p-6 space-y-8 overflow-y-auto h-full w-full max-w-7xl mx-auto">
+    <div className="p-6 space-y-8 overflow-y-auto h-full w-full max-w-7xl mx-auto custom-scroll">
       {/* Welcome Banner */}
-      <div className="p-6 rounded-2xl glass border border-slate-800 flex items-center justify-between relative overflow-hidden">
-        <div className="absolute -top-32 -right-32 w-64 h-64 rounded-full bg-indigo-500/10 blur-3xl"></div>
+      <div className="p-6 rounded-2xl glass border border-[#F2F0E6]/10 flex items-center justify-between relative overflow-hidden">
+        <div className="absolute -top-32 -right-32 w-64 h-64 rounded-full bg-[#C98A2E]/5 blur-3xl"></div>
         <div className="space-y-1 z-10">
-          <h2 className="text-2xl font-bold text-white tracking-tight">StockFlow Workspace Status</h2>
-          <p className="text-slate-400 text-sm">Review aggregate metrics and handle restocking alerts from a single multi-tenant dashboard.</p>
+          <h2 className="text-2xl font-heading font-extrabold text-white tracking-tight">Officer Admin Workspace</h2>
+          <p className="text-[#F2F0E6]/60 text-sm">Review village development statistics, scheme budgets, and handle citizen grievances from a unified portal.</p>
         </div>
-        <TrendingUp className="text-indigo-500/20 w-16 h-16 mr-4 hidden md:block" />
+        <Compass className="text-[#C98A2E]/10 w-16 h-16 mr-4 hidden md:block" />
       </div>
 
       {/* KPI Grid */}
@@ -91,23 +94,23 @@ export default function Dashboard() {
             >
               <div className="flex items-start justify-between">
                 <div>
-                  <p className="text-slate-400 text-xs font-semibold uppercase tracking-wider">{kpi.title}</p>
-                  <h3 className="text-4xl font-extrabold text-white mt-2 tracking-tight">
-                    {kpi.value.toLocaleString()}
+                  <p className="text-[#F2F0E6]/50 text-xs font-mono font-bold uppercase tracking-wider">{kpi.title}</p>
+                  <h3 className="text-3xl font-heading font-black text-white mt-2 tracking-tight">
+                    {kpi.value}
                   </h3>
                 </div>
                 <div className={`p-3 rounded-xl ${kpi.iconBg}`}>
                   <Icon size={22} />
                 </div>
               </div>
-              <p className="text-slate-500 text-xs flex items-center gap-1.5 font-medium mt-4">
-                {kpi.title === 'Low Stock Items' && data?.lowStockCount > 0 ? (
+              <p className="text-[#F2F0E6]/40 text-xs flex items-center gap-1.5 font-medium mt-4">
+                {kpi.title === 'Pending Citizen Grievances' && data?.lowStockCount > 0 ? (
                   <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-red-500/10 text-red-400 border border-red-500/20">
-                    Needs Attention
+                    Needs Action
                   </span>
-                ) : kpi.title === 'Low Stock Items' ? (
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                    All Healthy
+                ) : kpi.title === 'Pending Citizen Grievances' ? (
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-green-500/10 text-green-400 border border-green-500/20">
+                    All Resolved
                   </span>
                 ) : null}
                 <span>{kpi.description}</span>
@@ -120,45 +123,37 @@ export default function Dashboard() {
       {/* Low Stock Warning Table & Links */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Table list - takes 2 cols on lg, 1 on md */}
-        <div className="lg:col-span-2 rounded-2xl glass border border-slate-800 p-6 flex flex-col justify-between min-h-[350px]">
+        <div className="lg:col-span-2 rounded-2xl glass border border-[#F2F0E6]/10 p-6 flex flex-col justify-between min-h-[350px]">
           <div>
-            <div className="flex items-center justify-between pb-4 border-b border-slate-800/80">
+            <div className="flex items-center justify-between pb-4 border-b border-[#F2F0E6]/10">
               <div className="flex items-center gap-2">
-                <AlertTriangle className="text-red-400" size={18} />
-                <h3 className="text-base font-semibold text-white">Low Stock Warning Indicators</h3>
+                <AlertTriangle className="text-red-400 animate-pulse" size={18} />
+                <h3 className="font-heading font-bold text-base text-white">Critical Grievances Needing Action</h3>
               </div>
-              <span className="text-xs font-medium text-slate-400 bg-slate-900 border border-slate-800 px-2.5 py-1 rounded-full">
-                {data?.lowStockCount || 0} alerts active
+              <span className="text-xs font-mono font-bold text-[#C98A2E] bg-[#C98A2E]/10 border border-[#C98A2E]/25 px-2.5 py-1 rounded-full">
+                {data?.lowStockCount || 0} open reports
               </span>
             </div>
 
             {/* List */}
             {data?.lowStockAlerts && data.lowStockAlerts.length > 0 ? (
               <div className="mt-4 overflow-x-auto">
-                <table className="w-full text-left text-sm border-collapse">
+                <table className="w-full text-left text-xs border-collapse">
                   <thead>
-                    <tr className="text-slate-500 text-xs uppercase font-semibold border-b border-slate-800/50">
-                      <th className="py-2.5">Product Name</th>
-                      <th className="py-2.5">SKU</th>
-                      <th className="py-2.5 text-center">In Stock</th>
-                      <th className="py-2.5 text-center">Alert Limit</th>
+                    <tr className="text-[#F2F0E6]/40 uppercase font-mono border-b border-[#F2F0E6]/10">
+                      <th className="py-2.5">Grievance Description</th>
+                      <th className="py-2.5">Category</th>
                       <th className="py-2.5 text-right">Status</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-800/40 text-slate-300">
+                  <tbody className="divide-y divide-[#F2F0E6]/5 text-[#F2F0E6]/80">
                     {data.lowStockAlerts.map((item) => (
-                      <tr key={item.id} className="hover:bg-slate-900/10 transition-colors">
+                      <tr key={item.id} className="hover:bg-[#24382C]/20 transition-colors">
                         <td className="py-3 font-semibold text-white">{item.name}</td>
-                        <td className="py-3 font-mono text-xs text-indigo-300">{item.sku}</td>
-                        <td className="py-3 text-center font-bold">{item.quantity}</td>
-                        <td className="py-3 text-center text-slate-400">{item.threshold}</td>
+                        <td className="py-3 font-mono text-[#C98A2E]">{item.sku}</td>
                         <td className="py-3 text-right">
-                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                            item.quantity === 0 
-                              ? 'bg-red-500/20 text-red-400 border border-red-500/30' 
-                              : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
-                          }`}>
-                            {item.quantity === 0 ? 'OUT OF STOCK' : 'LOW STOCK'}
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-red-500/10 text-red-400 border border-red-500/20">
+                            PENDING
                           </span>
                         </td>
                       </tr>
@@ -167,61 +162,62 @@ export default function Dashboard() {
                 </table>
               </div>
             ) : (
-              <div className="flex flex-col items-center justify-center py-16 text-slate-500 gap-2">
-                <Warehouse size={40} className="text-slate-700" />
-                <p className="text-sm font-medium">All products are healthy and above low-stock thresholds!</p>
+              <div className="flex flex-col items-center justify-center py-16 text-[#F2F0E6]/40 gap-2">
+                <CheckCircle2 size={40} className="text-[#C98A2E]" />
+                <p className="text-sm font-medium">All citizen grievances are fully resolved!</p>
               </div>
             )}
           </div>
 
-          <div className="pt-4 border-t border-slate-800/60 mt-4 flex justify-end">
+          <div className="pt-4 border-t border-[#F2F0E6]/10 mt-4 flex justify-end">
             <Link 
               to="/products" 
-              className="text-xs text-indigo-400 hover:text-indigo-300 font-semibold flex items-center gap-1.5 transition-colors"
+              className="text-xs text-[#C98A2E] hover:underline font-semibold flex items-center gap-1.5 transition-colors"
             >
-              <span>Manage Products Catalog</span>
-              <ArrowRightLeft size={12} />
+              <span>Manage Welfare Schemes</span>
+              <ArrowRight size={12} />
             </Link>
           </div>
         </div>
 
-        {/* Organization Information Card */}
-        <div className="rounded-2xl glass border border-slate-800 p-6 flex flex-col justify-between">
+        {/* LGD Audit Info Card */}
+        <div className="rounded-2xl glass border border-[#F2F0E6]/10 p-6 flex flex-col justify-between">
           <div className="space-y-4">
-            <div className="pb-4 border-b border-slate-800">
-              <h3 className="text-base font-semibold text-white">Workspace Details</h3>
+            <div className="pb-4 border-b border-[#F2F0E6]/10">
+              <h3 className="font-heading font-bold text-base text-white">LGD Village Parameters</h3>
             </div>
             
             <div className="space-y-3.5 mt-2">
               <div className="space-y-1">
-                <span className="text-[10px] uppercase font-semibold text-slate-500 tracking-wider">Default Threshold</span>
-                <p className="text-sm font-medium text-slate-200">
-                  {data?.defaultThreshold || 10} units (global setting)
+                <span className="text-[10px] uppercase font-mono font-bold text-[#F2F0E6]/50 tracking-wider">Overall Health Index</span>
+                <p className="text-lg font-heading font-black text-[#C98A2E] font-mono-num">
+                  {data?.developmentScore || 87} / 100
                 </p>
               </div>
               
               <div className="space-y-1">
-                <span className="text-[10px] uppercase font-semibold text-slate-500 tracking-wider">Storage Engine</span>
-                <p className="text-sm font-medium text-indigo-300 font-mono">
-                  SQLite File DB (local mode)
+                <span className="text-[10px] uppercase font-mono font-bold text-[#F2F0E6]/50 tracking-wider">AI Risk Classification</span>
+                <p className="text-sm font-heading font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 bg-green-500 rounded-full animate-pulse" />
+                  {data?.riskLevel || 'LOW'} RISK
                 </p>
               </div>
 
               <div className="space-y-1">
-                <span className="text-[10px] uppercase font-semibold text-slate-500 tracking-wider">Tenant Isolation Scope</span>
-                <p className="text-xs leading-relaxed text-slate-400 font-medium bg-indigo-500/5 border border-indigo-500/10 p-2.5 rounded-xl">
-                  Row level parameters ensure only active organization users have access to these product statistics.
+                <span className="text-[10px] uppercase font-mono font-bold text-[#F2F0E6]/50 tracking-wider">Audit Security Isolation</span>
+                <p className="text-xs leading-relaxed text-[#F2F0E6]/70 font-light bg-[#16241D] border border-[#F2F0E6]/5 p-2.5 rounded-xl">
+                  Prisma scoped queries ensure officers only have administrative management access to LGD resources belonging to their assigned code register.
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="pt-4 border-t border-slate-800 mt-6">
+          <div className="pt-4 border-t border-[#F2F0E6]/10 mt-6">
             <Link 
               to="/settings"
-              className="w-full text-center bg-slate-900 border border-slate-800 hover:bg-slate-800/80 text-white font-medium rounded-xl py-2.5 px-4 text-xs block transition-all"
+              className="w-full text-center bg-[#24382C] border border-[#F2F0E6]/10 hover:bg-[#24382C]/80 text-white font-mono font-bold rounded-xl py-2.5 px-4 text-xs block transition-all"
             >
-              Configure Thresholds
+              Configure Office Code
             </Link>
           </div>
         </div>

@@ -5,206 +5,204 @@ import authMiddleware from '../middleware/auth.js';
 
 const router = express.Router();
 
-// Apply auth middleware to all product routes
 router.use(authMiddleware);
 
-// 1. GET /api/products - List all products for the authenticated organization
+// Helper to seed default schemes dynamically for the officer's village if none exist
+async function getOrSeedSchemes(villageCode) {
+  const schemes = await prisma.villageScheme.findMany({
+    where: { villageCode },
+    orderBy: { name: 'asc' }
+  });
+
+  if (schemes.length > 0) {
+    return schemes;
+  }
+
+  // Seed default schemes
+  const defaultSchemes = [
+    { name: 'Mission Bhagiratha (Drinking Water)', allocatedBudget: 1500000, spentBudget: 1350000, status: 'Completed' },
+    { name: 'Rythu Bandhu (Farmer Investment Support)', allocatedBudget: 2500000, spentBudget: 2500000, status: 'Completed' },
+    { name: 'Mana Ooru Mana Badi (School Infrastructure)', allocatedBudget: 1800000, spentBudget: 1200000, status: 'In Progress' },
+    { name: 'Arogyasri Health Scheme Support', allocatedBudget: 800000, spentBudget: 750000, status: 'Completed' },
+    { name: 'Palle Pragathi (Rural Development Works)', allocatedBudget: 1200000, spentBudget: 900000, status: 'In Progress' }
+  ];
+
+  await prisma.villageScheme.createMany({
+    data: defaultSchemes.map(s => ({
+      ...s,
+      villageCode
+    }))
+  });
+
+  return prisma.villageScheme.findMany({
+    where: { villageCode },
+    orderBy: { name: 'asc' }
+  });
+}
+
+// 1. GET /api/products - List all schemes for the officer's village
 router.get('/', async (req, res) => {
   try {
-    const products = await prisma.product.findMany({
-      where: { organizationId: req.user.organizationId },
-      orderBy: { updatedAt: 'desc' },
-    });
-    return res.status(200).json(products);
+    const lgdCode = req.user.lgdCode || 569005;
+    const schemes = await getOrSeedSchemes(lgdCode);
+
+    // Map schemes to the expected product structure
+    const formatted = schemes.map(s => ({
+      id: s.id,
+      name: s.name,
+      sku: s.status, // Status mapped to SKU
+      quantity: s.allocatedBudget, // Allocated Budget mapped to Quantity
+      costPrice: s.spentBudget, // Spent Budget mapped to Cost Price
+      sellingPrice: 0,
+      description: `Scheme administered by LGD Village: ${lgdCode}.`,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    }));
+
+    return res.status(200).json(formatted);
   } catch (error) {
-    console.error('Fetch products error:', error);
-    return res.status(500).json({ error: 'Internal server error fetching products' });
+    console.error('Fetch schemes error:', error);
+    return res.status(500).json({ error: 'Internal server error fetching village schemes' });
   }
 });
 
-// 2. GET /api/products/search - Search products by name or SKU (scoped to tenant)
+// 2. GET /api/products/search - Search schemes by name or status
 router.get('/search', async (req, res) => {
   try {
     const query = req.query.q ? String(req.query.q).trim() : '';
-    
-    const products = await prisma.product.findMany({
+    const lgdCode = req.user.lgdCode || 569005;
+
+    const schemes = await prisma.villageScheme.findMany({
       where: {
-        organizationId: req.user.organizationId,
+        villageCode: lgdCode,
         OR: [
-          { name: { contains: query } },
-          { sku: { contains: query } },
-        ],
+          { name: { contains: query, mode: 'insensitive' } },
+          { status: { contains: query, mode: 'insensitive' } }
+        ]
       },
-      orderBy: { updatedAt: 'desc' },
+      orderBy: { name: 'asc' }
     });
-    
-    return res.status(200).json(products);
+
+    const formatted = schemes.map(s => ({
+      id: s.id,
+      name: s.name,
+      sku: s.status,
+      quantity: s.allocatedBudget,
+      costPrice: s.spentBudget,
+      sellingPrice: 0,
+      description: `Scheme administered by LGD Village: ${lgdCode}.`
+    }));
+
+    return res.status(200).json(formatted);
   } catch (error) {
-    console.error('Search products error:', error);
-    return res.status(500).json({ error: 'Internal server error searching products' });
+    console.error('Search schemes error:', error);
+    return res.status(500).json({ error: 'Internal server error searching village schemes' });
   }
 });
 
-// Helper for validating product body inputs
-function validateProductInputs(body) {
-  const { name, sku, quantity, costPrice, sellingPrice, lowStockThreshold } = body;
-  
-  if (!name || !name.trim()) return 'Product name is required';
-  if (!sku || !sku.trim()) return 'SKU is required';
-
-  const q = Number(quantity);
-  if (isNaN(q) || q < 0) return 'Quantity must be a non-negative integer';
-
-  const cp = Number(costPrice);
-  if (isNaN(cp) || cp < 0) return 'Cost Price must be a non-negative number';
-
-  const sp = Number(sellingPrice);
-  if (isNaN(sp) || sp < 0) return 'Selling Price must be a non-negative number';
-
-  if (lowStockThreshold !== undefined && lowStockThreshold !== null && lowStockThreshold !== '') {
-    const threshold = Number(lowStockThreshold);
-    if (isNaN(threshold) || threshold < 0) return 'Low stock threshold must be a non-negative integer';
-  }
-
-  return null;
-}
-
-// 3. POST /api/products - Create a new product (scoped to tenant)
+// 3. POST /api/products - Create a new scheme
 router.post('/', async (req, res) => {
   try {
-    const validationError = validateProductInputs(req.body);
-    if (validationError) {
-      return res.status(400).json({ error: validationError });
+    const { name, sku, quantity, costPrice } = req.body;
+    const lgdCode = req.user.lgdCode || 569005;
+
+    if (!name || !name.trim()) {
+      return res.status(400).json({ error: 'Scheme name is required' });
     }
 
-    const { name, sku, description, quantity, costPrice, sellingPrice, lowStockThreshold } = req.body;
-    const organizationId = req.user.organizationId;
-
-    // Check SKU uniqueness in this organization
-    const existingProduct = await prisma.product.findUnique({
-      where: {
-        organizationId_sku: {
-          organizationId,
-          sku: sku.trim(),
-        },
-      },
-    });
-
-    if (existingProduct) {
-      return res.status(400).json({ error: `Product with SKU "${sku}" already exists in your organization.` });
-    }
-
-    const product = await prisma.product.create({
+    const scheme = await prisma.villageScheme.create({
       data: {
-        organizationId,
         name: name.trim(),
-        sku: sku.trim(),
-        description: description ? description.trim() : null,
-        quantity: Math.floor(Number(quantity)),
-        costPrice: Number(costPrice),
-        sellingPrice: Number(sellingPrice),
-        lowStockThreshold: (lowStockThreshold !== undefined && lowStockThreshold !== null && lowStockThreshold !== '') 
-          ? Math.floor(Number(lowStockThreshold)) 
-          : null,
-      },
+        status: sku || 'In Progress', // Status mapped from sku
+        allocatedBudget: parseFloat(quantity) || 0, // Budget mapped from quantity
+        spentBudget: parseFloat(costPrice) || 0, // Spent mapped from costPrice
+        villageCode: lgdCode
+      }
     });
 
-    return res.status(201).json(product);
+    // Return mapped to product format
+    return res.status(201).json({
+      id: scheme.id,
+      name: scheme.name,
+      sku: scheme.status,
+      quantity: scheme.allocatedBudget,
+      costPrice: scheme.spentBudget,
+      sellingPrice: 0
+    });
   } catch (error) {
-    console.error('Create product error:', error);
-    return res.status(500).json({ error: 'Internal server error creating product' });
+    console.error('Create scheme error:', error);
+    return res.status(500).json({ error: 'Internal server error creating scheme' });
   }
 });
 
-// 4. PUT /api/products/:id - Update an existing product
+// 4. PUT /api/products/:id - Update an existing scheme
 router.put('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const organizationId = req.user.organizationId;
+    const { name, sku, quantity, costPrice } = req.body;
+    const lgdCode = req.user.lgdCode || 569005;
 
-    // Verify product exists and belongs to the organization
-    const product = await prisma.product.findFirst({
+    // Verify scheme exists and belongs to this village
+    const scheme = await prisma.villageScheme.findFirst({
       where: {
         id,
-        organizationId,
-      },
+        villageCode: lgdCode
+      }
     });
 
-    if (!product) {
-      return res.status(404).json({ error: 'Product not found or access denied' });
+    if (!scheme) {
+      return res.status(404).json({ error: 'Scheme not found or access denied' });
     }
 
-    const validationError = validateProductInputs(req.body);
-    if (validationError) {
-      return res.status(400).json({ error: validationError });
-    }
-
-    const { name, sku, description, quantity, costPrice, sellingPrice, lowStockThreshold } = req.body;
-
-    // Check if SKU is being changed and if new SKU is already taken in this organization
-    if (sku.trim() !== product.sku) {
-      const existingProduct = await prisma.product.findUnique({
-        where: {
-          organizationId_sku: {
-            organizationId,
-            sku: sku.trim(),
-          },
-        },
-      });
-
-      if (existingProduct) {
-        return res.status(400).json({ error: `Product with SKU "${sku}" already exists in your organization.` });
-      }
-    }
-
-    const updatedProduct = await prisma.product.update({
+    const updated = await prisma.villageScheme.update({
       where: { id },
       data: {
-        name: name.trim(),
-        sku: sku.trim(),
-        description: description ? description.trim() : null,
-        quantity: Math.floor(Number(quantity)),
-        costPrice: Number(costPrice),
-        sellingPrice: Number(sellingPrice),
-        lowStockThreshold: (lowStockThreshold !== undefined && lowStockThreshold !== null && lowStockThreshold !== '') 
-          ? Math.floor(Number(lowStockThreshold)) 
-          : null,
-      },
+        name: name ? name.trim() : scheme.name,
+        status: sku ? sku.trim() : scheme.status,
+        allocatedBudget: quantity !== undefined ? parseFloat(quantity) : scheme.allocatedBudget,
+        spentBudget: costPrice !== undefined ? parseFloat(costPrice) : scheme.spentBudget
+      }
     });
 
-    return res.status(200).json(updatedProduct);
+    return res.status(200).json({
+      id: updated.id,
+      name: updated.name,
+      sku: updated.status,
+      quantity: updated.allocatedBudget,
+      costPrice: updated.spentBudget,
+      sellingPrice: 0
+    });
   } catch (error) {
-    console.error('Update product error:', error);
-    return res.status(500).json({ error: 'Internal server error updating product' });
+    console.error('Update scheme error:', error);
+    return res.status(500).json({ error: 'Internal server error updating scheme' });
   }
 });
 
-// 5. DELETE /api/products/:id - Delete product
+// 5. DELETE /api/products/:id - Delete scheme
 router.delete('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const organizationId = req.user.organizationId;
+    const lgdCode = req.user.lgdCode || 569005;
 
-    // Verify product exists and belongs to this organization
-    const product = await prisma.product.findFirst({
+    const scheme = await prisma.villageScheme.findFirst({
       where: {
         id,
-        organizationId,
-      },
+        villageCode: lgdCode
+      }
     });
 
-    if (!product) {
-      return res.status(404).json({ error: 'Product not found or access denied' });
+    if (!scheme) {
+      return res.status(404).json({ error: 'Scheme not found or access denied' });
     }
 
-    await prisma.product.delete({
-      where: { id },
+    await prisma.villageScheme.delete({
+      where: { id }
     });
 
-    return res.status(200).json({ message: 'Product successfully deleted' });
+    return res.status(200).json({ message: 'Scheme successfully deleted' });
   } catch (error) {
-    console.error('Delete product error:', error);
-    return res.status(500).json({ error: 'Internal server error deleting product' });
+    console.error('Delete scheme error:', error);
+    return res.status(500).json({ error: 'Internal server error deleting scheme' });
   }
 });
 

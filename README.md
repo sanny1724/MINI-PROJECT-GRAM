@@ -1,48 +1,52 @@
-# StockFlow MVP (v0.1)
+# GRAM (v1.0) — Governance Risk & Accountability Monitor
 
-StockFlow is a premium, minimal SaaS multi-tenant inventory management platform designed to help organizations track catalogs, monitor aggregate stock counts, and receive real-time low-stock alerts with strict tenant isolation.
+GRAM is a premium, state-of-the-art Government Digital Mission dashboard designed for statewide deployment in Telangana. It promotes village accountability, budget transparency, and AI-led risk audit operations using the official Local Government Directory (LGD) datasets.
 
 ---
 
 ## 🔗 Live Deployments & Repository
 - **Live Frontend Web Client:** [https://taskwexaai.netlify.app/](https://taskwexaai.netlify.app/)
 - **Live Backend REST API:** [https://task-wexa-ai.onrender.com/](https://task-wexa-ai.onrender.com/)
-- **GitHub Repository:** [https://github.com/sanny1724/task-wexa.ai](https://github.com/sanny1724/task-wexa.ai)
+- **GitHub Repository:** [https://github.com/sanny1724/MINI-PROJECT-GRAM.git](https://github.com/sanny1724/MINI-PROJECT-GRAM.git)
 
 ---
 
 ## 🚀 Core Features
 
-- **Multi-Tenant Registration**: Sign up registers a new tenant Organization and binds the user as its administrator.
-- **Strict Tenant Isolation**: All REST API queries are scoped dynamically by the authenticated user's `organizationId` decoded from the JWT token. Users can never view, update, or delete products belonging to another tenant.
-- **Product Catalog CRUD**: Complete inventory management with Name, SKU, Description, Quantity, Cost Price, Selling Price, and Low-Stock Threshold fields.
-- **Dynamic KPI Dashboard**: Instant aggregates for:
-  - **Total Products** (unique catalog SKUs).
-  - **Total Inventory Units** (aggregate items in stock).
-  - **Low Stock Count** (items below custom limit or organization default threshold).
-- **Custom Delete Confirmation**: Prevention of accidental catalog deletions via custom warning modals.
-- **Zero-Setup Seeding**: Pre-loaded mock tenant and inventory data to facilitate immediate testing.
-- **Premium Glassmorphic Dark UI**: Modern dark theme with HSL colors, responsive grids, hover scales, and animated toast feedback.
+### 1. Interactive LGD Directory & Map Search
+- **Interactive SVG Map**: High-fidelity zoom path (**State → District → Mandal → Village**) rendering district boundaries and coordinates from official Telangana datasets.
+- **Real-Time Autocomplete**: Instant search index of **1 State, 33 Districts, 621 Mandals, and 11,308 Villages**.
+- **Risk Indicator Map**: Village map nodes highlighted with dynamic glow patterns indicating high/medium/low development indices.
+
+### 2. Public Village Governance Dashboard
+- **Scorecard Audits**: Transparent indicator scores across 5 core domains: *Water*, *Education*, *Health*, *Agriculture*, and *Governance*.
+- **Procedural Metrics**: Seeded deterministically using numerical LGD codes, ensuring 100% data coverage without database storage bloat.
+- **Budget Transparency**: Real-time breakdown of financial funds allocated vs. funds utilized.
+- **Grievance Escalation Portal**: Citizens can log grievances that auto-route to designated administrators.
+
+### 3. Officer & Administrative Console
+- **Role-based Authentication**: Secure JWT session portal supporting Panchayat Secretaries, District Collectors, and State Admin.
+- **Welfare Schemes Manager**: CRUD portal allowing officers to edit, lookup, register, and track implementation progress of local schemes.
+- **Grievance Resolution Desk**: Console displaying pending village reports for action and review.
 
 ---
 
 ## 🛠️ Technology Stack
 
 ### Frontend
-- **React (Vite)**
-- **React Router** (SPA routing and protected routes)
-- **Axios** (API requests with automatic token headers)
-- **Tailwind CSS v4** (Utility styles compiled via Vite CSS injection)
-- **React Hook Form** (Client-side validation)
-- **React Toastify** (Dynamic UI status notifications)
-- **Lucide React** (Modern line icons)
+- **React (Vite)** with React Router (SPA routing and protected routes).
+- **Axios** (API requests with automatic token headers).
+- **Tailwind CSS v4** (Utility styles compiled via Vite CSS injection).
+- **React Hook Form** (Client-side validation).
+- **React Toastify** (Dynamic UI status notifications).
+- **Lucide React** (Modern line icons).
 
 ### Backend
-- **Node.js + Express** (Modular routers)
-- **Prisma ORM** (Database client and schema definitions)
-- **PostgreSQL** (Production data persistence)
-- **JWT Authentication** (JSON Web Tokens signed for 24h sessions)
-- **bcrypt** (Secure password hashing)
+- **Node.js + Express** (Modular routers).
+- **Prisma ORM** (Database client and schema definitions).
+- **PostgreSQL** (Production data persistence).
+- **JWT Authentication** (JSON Web Tokens signed for 24h sessions).
+- **bcrypt** (Secure password hashing).
 
 ---
 
@@ -51,30 +55,40 @@ StockFlow is a premium, minimal SaaS multi-tenant inventory management platform 
 ```
 .
 ├── backend/
+│   ├── data/
+│   │   ├── districts.xlsx  # LGD raw district lists
+│   │   ├── mandals.xlsx    # LGD raw mandal lists
+│   │   └── villages.xlsx   # LGD raw village lists
 │   ├── prisma/
-│   │   └── schema.prisma  # Prisma schema definitions (PostgreSQL)
+│   │   └── schema.prisma  # Prisma database schemas (PostgreSQL)
 │   ├── src/
 │   │   ├── middleware/
 │   │   │   └── auth.js    # JWT verification middleware
 │   │   ├── routes/
-│   │   │   ├── auth.js    # signup and login endpoints
-│   │   │   ├── products.js # tenant-scoped product CRUD routes
-│   │   │   ├── dashboard.js# aggregate KPIs and warnings
-│   │   │   └── settings.js # organization metadata settings
+│   │   │   ├── auth.js    # Sign up and login endpoints
+│   │   │   ├── products.js # Scheme CRUD routes (mapped as products)
+│   │   │   ├── dashboard.js# Aggregate KPIs & Grievance alerts
+│   │   │   ├── settings.js # Panchayat office settings
+│   │   │   └── lgd.js     # Public LGD directory & metrics router
 │   │   ├── prisma.js      # Global Prisma client exporter
-│   │   ├── seed.js        # DB seeding script
+│   │   ├── seed.js        # DB officer seeding script
+│   │   ├── seed_lgd.py    # Python seeding script for Excel sheets
 │   │   └── server.js      # Express server entry point & CORS configuration
 │   ├── package.json       # Express server configurations
 │   └── .env               # Backend environment secrets
 ├── frontend/
 │   ├── src/
+│   │   ├── assets/
+│   │   │   └── telangana-districts.js # Compiled district SVG path geometries
 │   │   ├── components/
 │   │   │   └── Layout.jsx # Workspace layout (sidebar + footer)
 │   │   ├── pages/
-│   │   │   ├── Dashboard.jsx # KPI cards & stock alerts
-│   │   │   ├── Login.jsx  # Toggleable auth form & validations
-│   │   │   ├── Products.jsx # Searchable CRUD table and modals
-│   │   │   └── Settings.jsx # Org metadata managers
+│   │   │   ├── LandingPage.jsx # 11-section interactive GIS map portal
+│   │   │   ├── PublicDashboard.jsx # Public village scorecards
+│   │   │   ├── Dashboard.jsx # Officer KPI cards & stock alerts
+│   │   │   ├── Login.jsx  # Toggleable officer login form
+│   │   │   ├── Products.jsx # Welfare schemes CRUD table
+│   │   │   └── Settings.jsx # LGD office configuration profile
 │   │   ├── api.js         # Axios interceptor config
 │   │   ├── App.jsx        # Routing coordinator
 │   │   ├── index.css      # Custom styling & Tailwind imports
@@ -90,17 +104,14 @@ StockFlow is a premium, minimal SaaS multi-tenant inventory management platform 
 
 ## 🔑 Demo Seed Credentials
 
-The database contains a preloaded demo organization and products:
+The database contains a preloaded demo Panchayat Secretary profile:
 - **Email Address:** `demo@example.com`
 - **Password:** `password123`
+- **Assigned Village:** Ankapur, Adilabad District (LGD: 569005)
 
 ---
 
 ## 💻 Local Development Setup
-
-### Prerequisites
-- **Node.js** (v18 or higher)
-- **PostgreSQL** or **SQLite** (change the `provider` in `backend/prisma/schema.prisma` if running locally without Postgres).
 
 ### Step 1: Configure Environment Variables
 Copy and rename the environment config file inside `backend/` as `.env`:
@@ -108,7 +119,7 @@ Copy and rename the environment config file inside `backend/` as `.env`:
 PORT=3001
 CLIENT_URL=http://localhost:5173
 JWT_SECRET=your_jwt_secret_here
-DATABASE_URL="postgresql://user:password@localhost:5432/stockflow"
+DATABASE_URL="postgresql://user:password@localhost:5432/gram"
 ```
 
 ### Step 2: Spin Up the Backend API
@@ -125,7 +136,7 @@ DATABASE_URL="postgresql://user:password@localhost:5432/stockflow"
    ```bash
    npm run dev
    ```
-The API server will listen on `http://localhost:3001` and automatically seed the database if empty.
+The API server will listen on `http://localhost:3001` and automatically seed the database user if empty.
 
 ### Step 3: Spin Up the Frontend Client
 1. Open a new terminal and navigate to the `frontend/` directory:
@@ -138,18 +149,3 @@ The API server will listen on `http://localhost:3001` and automatically seed the
    npm run dev
    ```
 The web app dashboard will open at `http://localhost:5173/`.
-
----
-
-## ☁️ Cloud Deployment
-
-### Backend (Render Blueprint)
-We provide a `render.yaml` blueprint. Import this repository under **Render > Blueprints** to deploy:
-- A free **PostgreSQL Database** (`stockflow-db`).
-- A live **Node.js Web Service** (`stockflow-backend`), which automatically connects to the Postgres database, runs database schema migrations, and seeds the default tenant.
-
-### Frontend (Netlify)
-Import the repository on **Netlify**. Netlify will use `netlify.toml` automatically:
-- **Build Command:** `npm run build`
-- **Publish Directory:** `frontend/dist`
-- Configure `VITE_API_URL` in the Netlify environment settings pointing to your live Render Web Service URL.

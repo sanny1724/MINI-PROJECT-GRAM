@@ -1,8 +1,8 @@
 # render.yaml
 services:
-  # StockFlow Express Backend API Service
+  # GRAM Express Backend API Service
   - type: web
-    name: stockflow-backend
+    name: gram-backend
     env: node
     plan: free
     buildCommand: npm install && npx prisma generate
@@ -14,13 +14,13 @@ services:
       - key: JWT_SECRET
         generateValue: true
       - key: CLIENT_URL
-        value: https://stockflow-mvp.netlify.app # Replace with your actual Netlify frontend URL
+        value: https://taskwexaai.netlify.app # Replace with your actual Netlify frontend URL
       - key: DATABASE_URL
         fromDatabase:
-          name: stockflow-db
+          name: gram-db
           property: connectionString
 
 databases:
-  # StockFlow PostgreSQL Database
-  - name: stockflow-db
+  # GRAM PostgreSQL Database
+  - name: gram-db
     plan: free

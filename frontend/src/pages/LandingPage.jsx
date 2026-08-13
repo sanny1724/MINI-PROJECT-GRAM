@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { 
   Search, MapPin, ArrowRight, ShieldAlert, Layers, 
   DollarSign, Activity, FileText, Droplet, GraduationCap, 
-  Plus, CheckCircle2, Phone, LogIn, Compass, Check
+  Plus, CheckCircle2, Phone, LogIn, Compass, Check, Sprout
 } from 'lucide-react';
 import api from '../api';
 import { telanganaMapData } from '../assets/telangana-districts';

@@ -3,7 +3,7 @@ import axios from 'axios';
 
 // Automatically route requests: local backend for local development, and live Render backend for production deploys
 const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-const API_BASE_URL = import.meta.env.VITE_API_URL || (isLocal ? 'http://localhost:3001' : 'https://task-wexa-ai.onrender.com');
+const API_BASE_URL = import.meta.env.VITE_API_URL || (isLocal ? 'http://localhost:8000' : 'https://task-wexa-ai.onrender.com');
 
 const api = axios.create({
   baseURL: `${API_BASE_URL}/api`,

@@ -1,35 +1,16 @@
-# ===================================================
-# GRAM TELANGANA GOVERNANCE PLATFORM .GITIGNORE
-# ===================================================
-
-# Dependency directories
 node_modules/
-jspm_packages/
-web_modules/
-
-# Local databases (SQLite / JSON fallbacks)
-*.db
-*.db-journal
-dev.db
-local_database.json
-
-# Environment variables & secrets
+backend/node_modules/
+frontend/node_modules/
 .env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
 backend/.env
-
-# Production build outputs
+*.db
+__pycache__/
+*.pyc
+.venv/
+venv/
 dist/
 build/
-out/
-.next/
-
-# Logs and system files
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.DS_Store
-Thumbs.db
+.idea/
+.vscode/
+*.xlsx
+*.csv

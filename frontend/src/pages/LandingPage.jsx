@@ -33,6 +33,19 @@ export default function LandingPage() {
 
   const [mandalsList, setMandalsList] = useState([]);
   const [villagesList, setVillagesList] = useState([]);
+  const [dbDistricts, setDbDistricts] = useState([]);
+
+  useEffect(() => {
+    const fetchDbDistricts = async () => {
+      try {
+        const response = await api.get('/geo/districts');
+        setDbDistricts(response.data);
+      } catch (err) {
+        console.error('Error fetching DB districts on mount:', err);
+      }
+    };
+    fetchDbDistricts();
+  }, []);
 
   // SVG viewBox state (matches default size in telangana-districts.js)
   const defaultViewBox = '0 0 930 880';
@@ -112,11 +125,11 @@ export default function LandingPage() {
 
     const delayDebounceFn = setTimeout(async () => {
       try {
-        const response = await api.get(`/lgd/search?q=${searchQuery}`);
+        const response = await api.get(`/geo/search?q=${searchQuery}`);
         setSearchResults(response.data);
         setShowDropdown(true);
       } catch (err) {
-        console.error('Error searching LGD:', err);
+        console.error('Error searching DB geo:', err);
       }
     }, 300);
 
@@ -151,7 +164,13 @@ export default function LandingPage() {
 
   // Zoom to District handler
   const zoomToDistrict = async (districtName, districtCode, bbox) => {
-    setSelectedDistrict({ code: districtCode, name: districtName, bbox });
+    // Resolve DB ID using districtName mapping
+    const matched = dbDistricts.find(
+      d => d.name.toLowerCase() === districtName.toLowerCase()
+    );
+    const dbId = matched ? matched.id : (districtCode || 1);
+
+    setSelectedDistrict({ code: dbId, name: districtName, bbox });
     setSelectedMandal(null);
     setMandalsList([]);
     setVillagesList([]);
@@ -159,8 +178,12 @@ export default function LandingPage() {
 
     // Fetch Mandals
     try {
-      const response = await api.get(`/lgd/districts/${districtCode}/mandals`);
-      setMandalsList(response.data);
+      const response = await api.get(`/geo/districts/${dbId}/mandals`);
+      const formattedMandals = response.data.map(m => ({
+        ...m,
+        code: m.id
+      }));
+      setMandalsList(formattedMandals);
     } catch (err) {
       console.error('Error fetching mandals:', err);
     }
@@ -175,17 +198,22 @@ export default function LandingPage() {
   const zoomToMandal = async (mandal, index, bbox) => {
     // Generate deterministic coordinates inside the district's bbox
     const distBBox = selectedDistrict.bbox;
-    const mX = distBBox.x + distBBox.width * (0.2 + getSeededRandom(mandal.code * 2) * 0.6);
-    const mY = distBBox.y + distBBox.height * (0.2 + getSeededRandom(mandal.code * 3) * 0.6);
+    const mCode = mandal.code || mandal.id;
+    const mX = distBBox.x + distBBox.width * (0.2 + getSeededRandom(mCode * 2) * 0.6);
+    const mY = distBBox.y + distBBox.height * (0.2 + getSeededRandom(mCode * 3) * 0.6);
 
-    setSelectedMandal({ code: mandal.code, name: mandal.name, x: mX, y: mY });
+    setSelectedMandal({ code: mCode, name: mandal.name, x: mX, y: mY });
     setVillagesList([]);
     setViewMode('mandal');
 
     // Fetch Villages
     try {
-      const response = await api.get(`/lgd/mandals/${mandal.code}/villages`);
-      setVillagesList(response.data);
+      const response = await api.get(`/geo/mandals/${mCode}/villages`);
+      const formattedVillages = response.data.map(v => ({
+        ...v,
+        code: v.id
+      }));
+      setVillagesList(formattedVillages);
     } catch (err) {
       console.error('Error fetching villages:', err);
     }
@@ -284,211 +312,68 @@ export default function LandingPage() {
         </div>
       </nav>
 
-      {/* SECTION 2 — HERO SECTION */}
-      <section id="home" className="relative min-h-screen pt-32 pb-20 px-6 flex items-center">
-        {/* Decorative Grid Lines */}
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(36,56,44,0.7),transparent_50%)] pointer-events-none" />
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(242,240,230,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(242,240,230,0.03)_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:radial-gradient(ellipse_at_center,black_70%,transparent_100%)] pointer-events-none" />
+      {/* SECTION 2 — HERO SECTION WITH BACKGROUND VIDEO */}
+      <section id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden">
+        {/* Background Cinematic Video */}
+        <div className="absolute inset-0 w-full h-full object-cover z-0">
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="w-full h-full object-cover"
+            poster="src/assets/hero.png"
+          >
+            <source src="/videos/telangana-heritage.mp4" type="video/mp4" />
+          </video>
+          {/* Subtle dark green/black overlay to maximize readability and state identity */}
+          <div className="absolute inset-0 bg-gradient-to-b from-[#16241D]/90 via-[#16241D]/80 to-[#16241D]" />
+        </div>
 
-        <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+        {/* Traditional Telangana Line/Architectural motifs (top/bottom borders) */}
+        <div className="absolute top-24 left-0 right-0 h-1 bg-[repeating-linear-gradient(90deg,#C98A2E,#C98A2E_10px,transparent_10px,transparent_20px)] opacity-20 z-10" />
+
+        <div className="max-w-4xl mx-auto w-full px-6 text-center z-10 flex flex-col items-center gap-8 pt-16">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#24382C]/70 border border-[#C98A2E]/25 text-[10px] font-mono font-bold tracking-widest text-[#C98A2E] uppercase backdrop-blur-sm animate-fade-in">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#C98A2E] animate-ping" />
+            Telangana State Portal
+          </div>
           
-          {/* Hero Left Side */}
-          <div className="lg:col-span-6 flex flex-col gap-6 z-10">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#24382C] border border-[#F2F0E6]/10 text-xs font-mono font-bold tracking-widest text-[#C98A2E] uppercase">
-              <Compass className="w-3.5 h-3.5 animate-spin" style={{ animationDuration: '6s' }} />
-              Statewide Governance Engine
-            </div>
-            
-            <div className="flex flex-col gap-2">
-              <h1 className="font-heading font-black text-6xl md:text-7.5xl leading-[0.95] text-[#F2F0E6]">
-                GRAM
-              </h1>
-              <h2 className="font-heading font-semibold text-2xl md:text-3.5xl text-[#C98A2E] italic leading-tight">
-                Governance Risk & Accountability Monitor
-              </h2>
-            </div>
-
-            <p className="font-heading text-lg md:text-xl text-[#F2F0E6]/95 leading-relaxed font-normal border-l-2 border-[#C98A2E]/50 pl-4 py-1">
-              "Transparency for Every Village.<br />Accountability for Every Citizen."
-            </p>
-
-            <p className="text-sm md:text-base text-[#F2F0E6]/75 leading-relaxed max-w-xl font-light">
-              GRAM is an AI-powered village governance and transparency platform that enables citizens, panchayat officials, and district administrators to monitor village development, public services, government schemes, budgets, grievances, and AI-generated risk analysis.
-            </p>
-
-            <div className="flex flex-col sm:flex-row gap-4 mt-4">
-              <button 
-                onClick={() => {
-                  const sec = document.getElementById('explore');
-                  if (sec) sec.scrollIntoView({ behavior: 'smooth' });
-                }}
-                className="bg-[#C98A2E] hover:bg-[#b07824] text-[#16241D] font-bold px-7 py-3.5 rounded-xl shadow-lg shadow-[#C98A2E]/20 transition-all flex items-center justify-center gap-2.5 group"
-              >
-                Explore Your Village
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </button>
-              <button 
-                onClick={() => navigate('/login')}
-                className="border border-[#F2F0E6]/20 hover:border-[#C98A2E] hover:bg-[#24382C]/30 text-[#F2F0E6] font-bold px-7 py-3.5 rounded-xl transition-all flex items-center justify-center gap-2"
-              >
-                Officer Login
-              </button>
-            </div>
+          <div className="flex flex-col gap-3">
+            <h1 className="font-heading font-black text-6xl md:text-8xl tracking-tight text-white leading-none">
+              GRAM
+            </h1>
+            <h2 className="font-heading font-bold text-lg md:text-2xl text-[#C98A2E] tracking-wider uppercase">
+              Governance Risk & Accountability Monitor
+            </h2>
           </div>
 
-          {/* Hero Right Side - The SVG Map */}
-          <div className="lg:col-span-6 flex flex-col items-center justify-center z-10">
-            <div className="w-full max-w-[550px] aspect-[93/88] bg-[#24382C]/40 border border-[#F2F0E6]/10 rounded-3xl p-6 backdrop-blur-sm relative overflow-hidden shadow-2xl glow-card">
-              
-              {/* Map Controls */}
-              <div className="absolute top-4 left-4 z-20 flex flex-col gap-2">
-                <span className="text-[10px] text-[#C98A2E] font-mono tracking-widest uppercase font-bold">
-                  {viewMode === 'state' ? 'State Boundary View' : viewMode === 'district' ? 'District Mandal View' : 'Mandal Village View'}
-                </span>
-                
-                {/* Back button */}
-                {viewMode !== 'state' && (
-                  <button 
-                    onClick={viewMode === 'mandal' ? resetToDistrict : resetToState}
-                    className="text-xs bg-[#16241D] hover:bg-[#24382C] border border-[#F2F0E6]/15 hover:border-[#C98A2E] text-[#F2F0E6] px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5"
-                  >
-                    ← Back to {viewMode === 'mandal' ? selectedDistrict.name : 'State View'}
-                  </button>
-                )}
-              </div>
+          <div className="flex flex-col gap-4 max-w-2xl">
+            <p className="font-heading text-xl md:text-3xl text-white font-normal italic leading-relaxed">
+              "Transparency for Every Village. Accountability for Every Citizen."
+            </p>
+            <p className="text-sm md:text-base text-[#F2F0E6]/70 leading-relaxed font-light">
+              Connecting Telangana's villages, people and governance through transparent data and intelligent insights.
+            </p>
+          </div>
 
-              {/* Tooltip Overlay */}
-              <div className="absolute bottom-4 right-4 z-20 bg-[#16241D] border border-[#F2F0E6]/10 px-4 py-2 rounded-xl text-xs shadow-lg min-w-[120px] pointer-events-none flex flex-col">
-                {hoveredDistrict && (
-                  <>
-                    <span className="text-[#C98A2E] font-bold font-heading text-sm">{hoveredDistrict}</span>
-                    <span className="text-[10px] text-[#F2F0E6]/60 font-mono">District (State Code: 36)</span>
-                  </>
-                )}
-                {hoveredMandal && !hoveredDistrict && (
-                  <>
-                    <span className="text-[#C98A2E] font-bold font-heading text-sm">{hoveredMandal.name}</span>
-                    <span className="text-[10px] text-[#F2F0E6]/60 font-mono">Mandal Code: {hoveredMandal.code}</span>
-                  </>
-                )}
-                {hoveredVillage && !hoveredMandal && !hoveredDistrict && (
-                  <>
-                    <span className="text-[#C98A2E] font-bold font-heading text-sm">{hoveredVillage.name}</span>
-                    <span className="text-[10px] text-[#F2F0E6]/60 font-mono">LGD Code: {hoveredVillage.code}</span>
-                    <span className="text-[11px] font-mono mt-1 flex items-center gap-1">
-                      Score: <b className="text-white">{hoveredVillage.developmentScore}</b> 
-                      <span className={`w-2 h-2 rounded-full ${
-                        hoveredVillage.riskLevel === 'LOW' ? 'bg-green-500' : hoveredVillage.riskLevel === 'MEDIUM' ? 'bg-yellow-500' : 'bg-red-500'
-                      }`} />
-                    </span>
-                  </>
-                )}
-                {!hoveredDistrict && !hoveredMandal && !hoveredVillage && (
-                  <>
-                    <span className="text-[#F2F0E6]/40 font-mono uppercase tracking-wider text-[9px] font-bold">LGD Interactive GIS</span>
-                    <span className="text-[#F2F0E6]/80 text-[10px]">Hover map to explore</span>
-                  </>
-                )}
-              </div>
-
-              {/* The SVG element */}
-              <svg
-                ref={mapSvgRef}
-                viewBox={viewBox}
-                className="w-full h-full object-contain transition-all duration-700 ease-out"
-                style={{ transformOrigin: 'center' }}
-              >
-                {/* State boundary backdrop */}
-                {telanganaMapData.stateBoundary && (
-                  <path 
-                    d={telanganaMapData.stateBoundary} 
-                    fill="none" 
-                    stroke="rgba(201, 138, 46, 0.05)" 
-                    strokeWidth="4"
-                  />
-                )}
-
-                {/* District Paths */}
-                {telanganaMapData.districts.map((d) => {
-                  const isActive = selectedDistrict && selectedDistrict.name === d.name;
-                  const isDimmed = selectedDistrict && selectedDistrict.name !== d.name;
-                  return (
-                    <path
-                      key={d.id}
-                      d={d.d}
-                      name={d.name}
-                      className={`tg-map-district ${isActive ? 'active' : ''}`}
-                      style={{
-                        opacity: isDimmed ? 0.08 : 1,
-                        pointerEvents: viewMode === 'state' ? 'auto' : 'none'
-                      }}
-                      onMouseEnter={() => setHoveredDistrict(d.name)}
-                      onMouseLeave={() => setHoveredDistrict(null)}
-                      onClick={(e) => handleDistrictPathClick(d, e)}
-                    />
-                  );
-                })}
-
-                {/* Mandal Markers (only displayed in district view) */}
-                {viewMode === 'district' && selectedDistrict && mandalsList.map((m, idx) => {
-                  // Position mandals deterministically within the district path bounding box
-                  const bbox = selectedDistrict.bbox;
-                  const seedX = m.code * 2;
-                  const seedY = m.code * 3;
-                  const mX = bbox.x + bbox.width * (0.25 + getSeededRandom(seedX) * 0.5);
-                  const mY = bbox.y + bbox.height * (0.25 + getSeededRandom(seedY) * 0.5);
-                  
-                  return (
-                    <g key={m.code} className="cursor-pointer">
-                      <circle
-                        cx={mX}
-                        cy={mY}
-                        r={bbox.width * 0.025 + 1}
-                        fill="#C98A2E"
-                        fillOpacity="0.8"
-                        stroke="#ffffff"
-                        strokeWidth={bbox.width * 0.005}
-                        className="animate-pulse"
-                        onMouseEnter={() => setHoveredMandal(m)}
-                        onMouseLeave={() => setHoveredMandal(null)}
-                        onClick={(e) => zoomToMandal(m, idx, e.target.getBBox())}
-                      />
-                    </g>
-                  );
-                })}
-
-                {/* Village Markers (only displayed in mandal view) */}
-                {viewMode === 'mandal' && selectedMandal && villagesList.map((v, idx) => {
-                  // Position villages in a circular dispersion around the mandal center
-                  const mX = selectedMandal.x;
-                  const mY = selectedMandal.y;
-                  const angle = getSeededRandom(v.code * 4) * Math.PI * 2;
-                  const dist = 3 + getSeededRandom(v.code * 5) * 12;
-                  
-                  const vX = mX + Math.cos(angle) * dist;
-                  const vY = mY + Math.sin(angle) * dist;
-
-                  const color = v.riskLevel === 'LOW' ? '#66bb6a' : v.riskLevel === 'MEDIUM' ? '#ffa726' : '#ef5350';
-
-                  return (
-                    <g key={v.code} className="cursor-pointer">
-                      <circle
-                        cx={vX}
-                        cy={vY}
-                        r={0.8}
-                        fill={color}
-                        stroke="#ffffff"
-                        strokeWidth="0.15"
-                        className="grid-cell-dot"
-                        onMouseEnter={() => setHoveredVillage(v)}
-                        onMouseLeave={() => setHoveredVillage(null)}
-                        onClick={() => navigate(`/public/village/${v.code}`)}
-                      />
-                    </g>
-                  );
-                })}
-              </svg>
-            </div>
+          <div className="flex flex-col sm:flex-row gap-4 mt-2">
+            <button 
+              onClick={() => {
+                const sec = document.getElementById('explore');
+                if (sec) sec.scrollIntoView({ behavior: 'smooth' });
+              }}
+              className="bg-[#C98A2E] hover:bg-[#b07824] text-[#16241D] font-bold text-sm px-8 py-4 rounded-xl shadow-lg shadow-[#C98A2E]/20 transition-all flex items-center justify-center gap-2.5 group"
+            >
+              Explore Your Village
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            </button>
+            <button 
+              onClick={() => navigate('/login')}
+              className="border border-[#F2F0E6]/25 hover:border-[#C98A2E] hover:bg-[#24382C]/30 text-[#F2F0E6] font-bold text-sm px-8 py-4 rounded-xl transition-all flex items-center justify-center gap-2 backdrop-blur-sm"
+            >
+              Officer Login
+            </button>
           </div>
         </div>
       </section>
@@ -1004,132 +889,324 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* SECTION 8 — WHY GRAM */}
-      <section className="py-24 px-6 max-w-7xl mx-auto">
+      {/* SECTION 7 — EVERY VILLAGE HAS A STORY */}
+      <section id="story" className="py-24 px-6 max-w-7xl mx-auto border-t border-[#F2F0E6]/10">
         <div className="text-center flex flex-col items-center gap-4 mb-16">
-          <span className="text-xs font-mono font-bold tracking-widest text-[#C98A2E] uppercase">Strategic Solution</span>
-          <h2 className="font-heading text-4xl md:text-5xl text-white font-bold leading-tight">Why GRAM?</h2>
+          <span className="text-xs font-mono font-bold tracking-widest text-[#C98A2E] uppercase">Village-First Design</span>
+          <h2 className="font-heading text-4xl md:text-5xl text-white font-bold leading-tight">Every Village Has a Story</h2>
           <div className="w-16 h-1 bg-[#C98A2E]" />
+          <p className="text-sm text-[#F2F0E6]/70 max-w-2xl mt-2 font-light">
+            Behind every LGD metric lies a real community. GRAM audits and visualizes 5 core sectors to convert raw village variables into targeted administrative support.
+          </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-          
-          {/* Current Problems */}
-          <div className="bg-[#24382C]/20 border border-red-500/10 p-8 rounded-3xl flex flex-col gap-6">
-            <h3 className="font-heading text-2xl text-red-400 font-bold border-b border-red-500/10 pb-4">Current Problems</h3>
-            <div className="flex flex-col gap-6">
-              <div className="flex items-start gap-4">
-                <div className="w-8 h-8 rounded-lg bg-red-500/10 text-red-400 flex items-center justify-center font-mono font-bold shrink-0">1</div>
-                <div>
-                  <h4 className="font-heading text-lg font-bold text-white leading-tight">Lack of Transparency</h4>
-                  <p className="text-xs text-[#F2F0E6]/60 mt-1 leading-relaxed">Citizens have no visual window into budgets, asset allocations, or development timelines.</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-4">
-                <div className="w-8 h-8 rounded-lg bg-red-500/10 text-red-400 flex items-center justify-center font-mono font-bold shrink-0">2</div>
-                <div>
-                  <h4 className="font-heading text-lg font-bold text-white leading-tight">Poor Monitoring</h4>
-                  <p className="text-xs text-[#F2F0E6]/60 mt-1 leading-relaxed">Panchayat development registers are isolated manual books. Audits only occur annually.</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-4">
-                <div className="w-8 h-8 rounded-lg bg-red-500/10 text-red-400 flex items-center justify-center font-mono font-bold shrink-0">3</div>
-                <div>
-                  <h4 className="font-heading text-lg font-bold text-white leading-tight">Delayed Response</h4>
-                  <p className="text-xs text-[#F2F0E6]/60 mt-1 leading-relaxed">Citizen grievances get trapped in local administrative queues, delaying resolutions by months.</p>
-                </div>
-              </div>
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
+          {/* Water Domain */}
+          <div className="bg-[#24382C]/30 border border-[#F2F0E6]/10 p-6 rounded-2xl flex flex-col gap-4 shadow-lg hover:border-[#C98A2E] transition-all">
+            <div className="w-12 h-12 rounded-xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-400">
+              <Droplet className="w-6 h-6" />
+            </div>
+            <h3 className="font-heading text-lg font-bold text-white">Water Supply</h3>
+            <p className="text-xs text-[#F2F0E6]/70 leading-relaxed font-light">
+              Audits Mission Bhagiratha pipeline pressures, chlorination levels, overhead tanks, and community borewell status.
+            </p>
+            <div className="mt-auto pt-4 border-t border-[#F2F0E6]/5 text-[9px] font-mono text-[#C98A2E] uppercase tracking-wider">
+              Data → AI Risk Anomaly
             </div>
           </div>
 
-          {/* GRAM Solution */}
-          <div className="bg-[#24382C]/50 border border-[#C98A2E]/25 p-8 rounded-3xl flex flex-col gap-6 shadow-xl relative glow-card">
-            <h3 className="font-heading text-2xl text-[#C98A2E] font-bold border-b border-[#C98A2E]/20 pb-4">GRAM Solution</h3>
-            <div className="flex flex-col gap-6">
-              <div className="flex items-start gap-4">
-                <div className="w-8 h-8 rounded-lg bg-[#C98A2E]/10 text-[#C98A2E] flex items-center justify-center font-mono font-bold shrink-0">1</div>
-                <div>
-                  <h4 className="font-heading text-lg font-bold text-white leading-tight">Real-time Monitoring</h4>
-                  <p className="text-xs text-[#F2F0E6]/75 mt-1 leading-relaxed">Open digital dashboard with GIS parameters. Local directories are audited continuously.</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-4">
-                <div className="w-8 h-8 rounded-lg bg-[#C98A2E]/10 text-[#C98A2E] flex items-center justify-center font-mono font-bold shrink-0">2</div>
-                <div>
-                  <h4 className="font-heading text-lg font-bold text-white leading-tight">AI Insights</h4>
-                  <p className="text-xs text-[#F2F0E6]/75 mt-1 leading-relaxed">Automated anomaly alarms flag delayed projects, budget overshoots, and target discrepancies.</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-4">
-                <div className="w-8 h-8 rounded-lg bg-[#C98A2E]/10 text-[#C98A2E] flex items-center justify-center font-mono font-bold shrink-0">3</div>
-                <div>
-                  <h4 className="font-heading text-lg font-bold text-white leading-tight">Transparent Governance</h4>
-                  <p className="text-xs text-[#F2F0E6]/75 mt-1 leading-relaxed">Escalation workflows route citizen alerts directly to District Collectors, enforcing accountability.</p>
-                </div>
-              </div>
+          {/* Education Domain */}
+          <div className="bg-[#24382C]/30 border border-[#F2F0E6]/10 p-6 rounded-2xl flex flex-col gap-4 shadow-lg hover:border-[#C98A2E] transition-all">
+            <div className="w-12 h-12 rounded-xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
+              <GraduationCap className="w-6 h-6" />
+            </div>
+            <h3 className="font-heading text-lg font-bold text-white">Schooling</h3>
+            <p className="text-xs text-[#F2F0E6]/70 leading-relaxed font-light">
+              Tracks government primary school classroom capacities, toilet sanitation, student-teacher ratios, and meal audits.
+            </p>
+            <div className="mt-auto pt-4 border-t border-[#F2F0E6]/5 text-[9px] font-mono text-[#C98A2E] uppercase tracking-wider">
+              Data → Infrastructure Action
             </div>
           </div>
 
+          {/* Health Domain */}
+          <div className="bg-[#24382C]/30 border border-[#F2F0E6]/10 p-6 rounded-2xl flex flex-col gap-4 shadow-lg hover:border-[#C98A2E] transition-all">
+            <div className="w-12 h-12 rounded-xl bg-red-500/10 border border-red-500/30 flex items-center justify-center text-red-400">
+              <Activity className="w-6 h-6" />
+            </div>
+            <h3 className="font-heading text-lg font-bold text-white">Health PHC</h3>
+            <p className="text-xs text-[#F2F0E6]/70 leading-relaxed font-light">
+              Monitors local Sub-Centre operations, medicine stock levels, vaccine availability, and doctor/nurse attendance records.
+            </p>
+            <div className="mt-auto pt-4 border-t border-[#F2F0E6]/5 text-[9px] font-mono text-[#C98A2E] uppercase tracking-wider">
+              Data → Risk Detection
+            </div>
+          </div>
+
+          {/* Agriculture Domain */}
+          <div className="bg-[#24382C]/30 border border-[#F2F0E6]/10 p-6 rounded-2xl flex flex-col gap-4 shadow-lg hover:border-[#C98A2E] transition-all">
+            <div className="w-12 h-12 rounded-xl bg-green-500/10 border border-green-500/30 flex items-center justify-center text-green-400">
+              <Sprout className="w-6 h-6" />
+            </div>
+            <h3 className="font-heading text-lg font-bold text-white">Agriculture</h3>
+            <p className="text-xs text-[#F2F0E6]/70 leading-relaxed font-light">
+              Audits Rythu Bandhu disbursement speeds, local ground water table levels, crop yield predictions, and market yard rates.
+            </p>
+            <div className="mt-auto pt-4 border-t border-[#F2F0E6]/5 text-[9px] font-mono text-[#C98A2E] uppercase tracking-wider">
+              Data → Farmers Support
+            </div>
+          </div>
+
+          {/* Governance Domain */}
+          <div className="bg-[#24382C]/30 border border-[#F2F0E6]/10 p-6 rounded-2xl flex flex-col gap-4 shadow-lg hover:border-[#C98A2E] transition-all">
+            <div className="w-12 h-12 rounded-xl bg-yellow-500/10 border border-yellow-500/30 flex items-center justify-center text-yellow-400">
+              <ShieldAlert className="w-6 h-6" />
+            </div>
+            <h3 className="font-heading text-lg font-bold text-white">Governance</h3>
+            <p className="text-xs text-[#F2F0E6]/70 leading-relaxed font-light">
+              Measures panchayat administrative speeds, budget disclosures, and citizen grievance resolution timeline compliance.
+            </p>
+            <div className="mt-auto pt-4 border-t border-[#F2F0E6]/5 text-[9px] font-mono text-[#C98A2E] uppercase tracking-wider">
+              Data → Public Audit
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* SECTION 9 — SUCCESS STORY */}
-      <section className="py-24 px-6 bg-[#24382C]/30 border-y border-[#F2F0E6]/10">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-          
-          <div className="lg:col-span-5 flex flex-col gap-4">
-            <span className="text-xs font-mono font-bold tracking-widest text-[#C98A2E] uppercase">Success Story</span>
-            <h2 className="font-heading text-4xl md:text-5xl text-white font-bold leading-tight">Model Village: Kothapally</h2>
-            <p className="text-sm text-[#F2F0E6]/70 leading-relaxed font-light">
-              Through GRAM's continuous audit tracking and citizen grievance escalation, Kothapally successfully restored its local water infrastructure and resolved its primary school resource crisis.
+      {/* SECTION 8 — GOVERNANCE TRANSITION: FROM DATA TO ACTION */}
+      <section className="py-24 px-6 bg-[#24382C]/30 border-y border-[#F2F0E6]/10 relative overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(201,138,46,0.04),transparent_50%)] pointer-events-none" />
+        
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center flex flex-col items-center gap-4 mb-16">
+            <span className="text-xs font-mono font-bold tracking-widest text-[#C98A2E] uppercase">Governance Transition</span>
+            <h2 className="font-heading text-4xl md:text-5xl text-white font-bold leading-tight">From Data to Action</h2>
+            <div className="w-16 h-1 bg-[#C98A2E]" />
+            <p className="text-sm text-[#F2F0E6]/70 max-w-xl mt-2 font-light">
+              GRAM bridges the gap between field infrastructure and administrative decision-making in five clear steps.
             </p>
-            <div className="bg-[#16241D] border border-[#F2F0E6]/10 p-5 rounded-2xl mt-4">
-              <span className="text-xs text-[#C98A2E] font-mono block">DEVELOPMENT INDEX</span>
-              <span className="text-3xl font-heading font-black text-white">94/100</span>
-              <span className="text-[10px] text-green-400 font-bold uppercase block mt-1">Top Performing Village</span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-8 relative">
+            {/* Step 1 */}
+            <div className="flex flex-col items-center text-center gap-4 z-10">
+              <div className="w-16 h-16 rounded-full bg-[#16241D]/90 border border-[#F2F0E6]/15 hover:border-[#C98A2E] flex items-center justify-center font-heading text-xl font-bold text-[#C98A2E] shadow-lg transition-colors">
+                1
+              </div>
+              <h4 className="font-heading text-base font-bold text-white uppercase tracking-wider">Ground Data</h4>
+              <p className="text-[11px] text-[#F2F0E6]/60 leading-relaxed max-w-[180px] font-light">
+                Sensors, registers, and citizen feedback generate continuous local status logs.
+              </p>
+            </div>
+
+            {/* Step 2 */}
+            <div className="flex flex-col items-center text-center gap-4 z-10">
+              <div className="w-16 h-16 rounded-full bg-[#16241D]/90 border border-[#F2F0E6]/15 hover:border-[#C98A2E] flex items-center justify-center font-heading text-xl font-bold text-[#C98A2E] shadow-lg transition-colors">
+                2
+              </div>
+              <h4 className="font-heading text-base font-bold text-white uppercase tracking-wider">AI Risk Engine</h4>
+              <p className="text-[11px] text-[#F2F0E6]/60 leading-relaxed max-w-[180px] font-light">
+                GRAM algorithms analyze data to predict project delays and resource deficits.
+              </p>
+            </div>
+
+            {/* Step 3 */}
+            <div className="flex flex-col items-center text-center gap-4 z-10">
+              <div className="w-16 h-16 rounded-full bg-[#16241D]/90 border border-[#F2F0E6]/15 hover:border-[#C98A2E] flex items-center justify-center font-heading text-xl font-bold text-[#C98A2E] shadow-lg transition-colors">
+                3
+              </div>
+              <h4 className="font-heading text-base font-bold text-white uppercase tracking-wider">Village Insight</h4>
+              <p className="text-[11px] text-[#F2F0E6]/60 leading-relaxed max-w-[180px] font-light">
+                Metrics are visualized instantly on public dashboards and administrative heatmaps.
+              </p>
+            </div>
+
+            {/* Step 4 */}
+            <div className="flex flex-col items-center text-center gap-4 z-10">
+              <div className="w-16 h-16 rounded-full bg-[#16241D]/90 border border-[#F2F0E6]/15 hover:border-[#C98A2E] flex items-center justify-center font-heading text-xl font-bold text-[#C98A2E] shadow-lg transition-colors">
+                4
+              </div>
+              <h4 className="font-heading text-base font-bold text-white uppercase tracking-wider">Official Action</h4>
+              <p className="text-[11px] text-[#F2F0E6]/60 leading-relaxed max-w-[180px] font-light">
+                Secretaries and Collectors review alerts and dispatch resources to resolve delays.
+              </p>
+            </div>
+
+            {/* Step 5 */}
+            <div className="flex flex-col items-center text-center gap-4 z-10">
+              <div className="w-16 h-16 rounded-full bg-[#16241D]/90 border border-[#F2F0E6]/15 hover:border-[#C98A2E] flex items-center justify-center font-heading text-xl font-bold text-[#C98A2E] shadow-lg transition-colors">
+                5
+              </div>
+              <h4 className="font-heading text-base font-bold text-white uppercase tracking-wider">Public Trust</h4>
+              <p className="text-[11px] text-[#F2F0E6]/60 leading-relaxed max-w-[180px] font-light">
+                Open, transparent loops build robust accountability for every Telangana citizen.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* SECTION 9 — PUBLIC TRANSPARENCY: YOUR VILLAGE. YOUR INFORMATION. */}
+      <section className="py-24 px-6 max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+          <div className="lg:col-span-5 flex flex-col gap-5">
+            <span className="text-xs font-mono font-bold tracking-widest text-[#C98A2E] uppercase">Citizen Empowerment</span>
+            <h2 className="font-heading text-4xl md:text-5xl text-white font-bold leading-tight">Your Village.<br />Your Information.</h2>
+            <div className="w-16 h-1 bg-[#C98A2E]" />
+            <p className="text-sm text-[#F2F0E6]/70 leading-relaxed font-light">
+              Panchayat resources belong to the community. GRAM provides complete, unauthenticated access to village status scorecards, welfare allocations, officials directories, and grievance registers.
+            </p>
+            
+            {/* Visual Guide Stepper */}
+            <div className="flex flex-col gap-4 mt-2">
+              <div className="flex items-start gap-4">
+                <span className="w-6 h-6 rounded-lg bg-[#C98A2E]/10 border border-[#C98A2E]/30 flex items-center justify-center font-mono text-[10px] font-bold text-[#C98A2E] shrink-0 mt-0.5">01</span>
+                <div>
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-white">Select District</h4>
+                  <p className="text-[11px] text-[#F2F0E6]/50">Navigate the State Map or directory to find your district.</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-4">
+                <span className="w-6 h-6 rounded-lg bg-[#C98A2E]/10 border border-[#C98A2E]/30 flex items-center justify-center font-mono text-[10px] font-bold text-[#C98A2E] shrink-0 mt-0.5">02</span>
+                <div>
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-white">Select Mandal</h4>
+                  <p className="text-[11px] text-[#F2F0E6]/50">Drill down into Mandal coordinates to list local villages.</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-4">
+                <span className="w-6 h-6 rounded-lg bg-[#C98A2E]/10 border border-[#C98A2E]/30 flex items-center justify-center font-mono text-[10px] font-bold text-[#C98A2E] shrink-0 mt-0.5">03</span>
+                <div>
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-white">Inspect Scorecard</h4>
+                  <p className="text-[11px] text-[#F2F0E6]/50">Inspect live scores, welfare budgets, and submit local grievances.</p>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div className="lg:col-span-7 grid grid-cols-1 md:grid-cols-2 gap-6">
-            
-            {/* Before */}
-            <div className="bg-[#16241D] border border-red-500/10 p-6 rounded-2xl flex flex-col gap-4">
-              <h3 className="font-heading text-lg text-red-400 font-bold">Before GRAM</h3>
-              <div className="flex flex-col gap-4 text-xs text-[#F2F0E6]/60">
-                <div className="flex items-center gap-3">
-                  <span className="w-2 h-2 rounded-full bg-red-400" />
-                  <span>High Water Scarcity (Drinking water 2 days/week)</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <span className="w-2 h-2 rounded-full bg-red-400" />
-                  <span>PHC ran without essential vaccines</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <span className="w-2 h-2 rounded-full bg-red-400" />
-                  <span>School infrastructure fund unused for 8 months</span>
-                </div>
+          {/* Interactive Live Preview Mockup */}
+          <div className="lg:col-span-7 bg-[#24382C]/20 border border-[#F2F0E6]/10 rounded-3xl p-8 relative overflow-hidden shadow-2xl glow-card">
+            <div className="flex justify-between items-start border-b border-[#F2F0E6]/10 pb-6 mb-6">
+              <div>
+                <h3 className="font-heading font-extrabold text-2xl text-white">Ankapur Village</h3>
+                <span className="text-xs font-mono text-[#F2F0E6]/60">LGD Code: 569005 • Nizamabad District</span>
+              </div>
+              <div className="flex flex-col items-end">
+                <span className="text-xs font-mono text-[#C98A2E] uppercase font-bold tracking-wider">Overall Score</span>
+                <span className="text-3xl font-heading font-black text-white font-mono-num">89<span className="text-sm font-light text-[#F2F0E6]/60">/100</span></span>
               </div>
             </div>
 
-            {/* After */}
-            <div className="bg-[#24382C]/50 border border-green-500/10 p-6 rounded-2xl flex flex-col gap-4 shadow-lg">
-              <h3 className="font-heading text-lg text-green-400 font-bold">After GRAM Integration</h3>
-              <div className="flex flex-col gap-4 text-xs text-[#F2F0E6]/80">
-                <div className="flex items-center gap-3">
-                  <Check className="w-4 h-4 text-green-400 shrink-0" />
-                  <span>Mission Bhagiratha pipelines audited & restored</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Check className="w-4 h-4 text-green-400 shrink-0" />
-                  <span>Clinics inventory re-stocked via automated alerts</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Check className="w-4 h-4 text-green-400 shrink-0" />
-                  <span>Mana Ooru Mana Badi funds fully spent on classrooms</span>
-                </div>
+            <div className="flex items-center justify-between bg-green-500/10 border border-green-500/20 px-4 py-2.5 rounded-xl mb-6">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-green-500 animate-ping" />
+                <span className="text-xs text-green-400 font-bold uppercase tracking-wider">AI Risk Level: LOW</span>
+              </div>
+              <span className="text-[10px] text-[#F2F0E6]/60 font-mono">Last Audited: Just Now</span>
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+              <div className="bg-[#16241D]/90 border border-[#F2F0E6]/5 p-3 rounded-xl flex flex-col items-center text-center">
+                <Droplet className="w-5 h-5 text-blue-400 mb-1" />
+                <span className="text-[9px] font-mono uppercase text-[#F2F0E6]/50">Water</span>
+                <span className="font-heading font-bold text-sm text-white mt-1">94</span>
+                <span className="text-[8px] text-green-400 font-bold uppercase mt-1">LOW Risk</span>
+              </div>
+              <div className="bg-[#16241D]/90 border border-[#F2F0E6]/5 p-3 rounded-xl flex flex-col items-center text-center">
+                <GraduationCap className="w-5 h-5 text-indigo-400 mb-1" />
+                <span className="text-[9px] font-mono uppercase text-[#F2F0E6]/50">Schooling</span>
+                <span className="font-heading font-bold text-sm text-white mt-1">88</span>
+                <span className="text-[8px] text-green-400 font-bold uppercase mt-1">LOW Risk</span>
+              </div>
+              <div className="bg-[#16241D]/90 border border-[#F2F0E6]/5 p-3 rounded-xl flex flex-col items-center text-center">
+                <Activity className="w-5 h-5 text-red-400 mb-1" />
+                <span className="text-[9px] font-mono uppercase text-[#F2F0E6]/50">Health</span>
+                <span className="font-heading font-bold text-sm text-white mt-1">81</span>
+                <span className="text-[8px] text-yellow-400 font-bold uppercase mt-1">MED Risk</span>
+              </div>
+              <div className="bg-[#16241D]/90 border border-[#F2F0E6]/5 p-3 rounded-xl flex flex-col items-center text-center">
+                <Sprout className="w-5 h-5 text-green-400 mb-1" />
+                <span className="text-[9px] font-mono uppercase text-[#F2F0E6]/50">Agri</span>
+                <span className="font-heading font-bold text-sm text-white mt-1">92</span>
+                <span className="text-[8px] text-green-400 font-bold uppercase mt-1">LOW Risk</span>
+              </div>
+              <div className="bg-[#16241D]/90 border border-[#F2F0E6]/5 p-3 rounded-xl flex flex-col items-center text-center col-span-2 md:col-span-1">
+                <ShieldAlert className="w-5 h-5 text-yellow-400 mb-1" />
+                <span className="text-[9px] font-mono uppercase text-[#F2F0E6]/50">Govern</span>
+                <span className="font-heading font-bold text-sm text-white mt-1">90</span>
+                <span className="text-[8px] text-green-400 font-bold uppercase mt-1">LOW Risk</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* SECTION 10 — OFFICIAL GOVERNANCE: FROM VILLAGE TO DISTRICT */}
+      <section className="py-24 px-6 bg-[#24382C]/30 border-t border-[#F2F0E6]/10">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+          
+          {/* Visual Scope Hierarchy Diagram */}
+          <div className="lg:col-span-7 grid grid-cols-1 gap-4">
+            {/* Village Scope Card */}
+            <div className="bg-[#16241D] border border-[#F2F0E6]/10 p-5 rounded-2xl flex items-center gap-5 shadow-md">
+              <div className="w-12 h-12 rounded-xl bg-[#C98A2E]/10 border border-[#C98A2E]/30 flex items-center justify-center font-heading text-lg font-bold text-[#C98A2E]">01</div>
+              <div className="flex flex-col">
+                <h4 className="font-heading text-base font-bold text-white">Village Officer (Sarpanch / Secretary)</h4>
+                <p className="text-xs text-[#F2F0E6]/60 leading-relaxed font-light mt-0.5">
+                  Detailed view of local complaints, pipeline sensors, and specific school construction registers.
+                </p>
               </div>
             </div>
 
+            {/* Mandal Scope Card */}
+            <div className="bg-[#16241D] border border-[#F2F0E6]/10 p-5 rounded-2xl flex items-center gap-5 shadow-md">
+              <div className="w-12 h-12 rounded-xl bg-[#C98A2E]/10 border border-[#C98A2E]/30 flex items-center justify-center font-heading text-lg font-bold text-[#C98A2E]">02</div>
+              <div className="flex flex-col">
+                <h4 className="font-heading text-base font-bold text-white">Mandal Administration (Tahsildar / MPDO)</h4>
+                <p className="text-xs text-[#F2F0E6]/60 leading-relaxed font-light mt-0.5">
+                  Aggregated dashboard of all constituent villages, flagging regional supply bottlenecks.
+                </p>
+              </div>
+            </div>
+
+            {/* District Scope Card */}
+            <div className="bg-[#16241D] border border-[#F2F0E6]/10 p-5 rounded-2xl flex items-center gap-5 shadow-md">
+              <div className="w-12 h-12 rounded-xl bg-[#C98A2E]/10 border border-[#C98A2E]/30 flex items-center justify-center font-heading text-lg font-bold text-[#C98A2E]">03</div>
+              <div className="flex flex-col">
+                <h4 className="font-heading text-base font-bold text-white">District Collector</h4>
+                <p className="text-xs text-[#F2F0E6]/60 leading-relaxed font-light mt-0.5">
+                  High-level heatmaps monitoring mandal performance indexes, delayed projects, and budget overruns.
+                </p>
+              </div>
+            </div>
+
+            {/* State Scope Card */}
+            <div className="bg-[#16241D] border border-[#F2F0E6]/10 p-5 rounded-2xl flex items-center gap-5 shadow-md border-dashed border-[#C98A2E]/40">
+              <div className="w-12 h-12 rounded-xl bg-[#C98A2E]/10 border border-[#C98A2E]/30 flex items-center justify-center font-heading text-lg font-bold text-[#C98A2E]">04</div>
+              <div className="flex flex-col">
+                <h4 className="font-heading text-base font-bold text-white">State Governance (Ministers / Directors)</h4>
+                <p className="text-xs text-[#F2F0E6]/60 leading-relaxed font-light mt-0.5">
+                  Macro trends showing statewide fund allocations, citizen grievance response speeds, and welfare audit metrics.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Description Column */}
+          <div className="lg:col-span-5 flex flex-col gap-4">
+            <span className="text-xs font-mono font-bold tracking-widest text-[#C98A2E] uppercase">Scope-Based Access</span>
+            <h2 className="font-heading text-4xl md:text-5xl text-white font-bold leading-tight">From Village<br />to District</h2>
+            <div className="w-16 h-1 bg-[#C98A2E]" />
+            <p className="text-sm text-[#F2F0E6]/70 leading-relaxed font-light">
+              GRAM secures governance boundaries dynamically. Local officers act on village detail registers, while Mandal, District, and State executives see consolidated, risk-weighted analytics according to their administrative level.
+            </p>
+            <div className="mt-2">
+              <button 
+                onClick={() => navigate('/login')}
+                className="bg-[#C98A2E] hover:bg-[#b07824] text-[#16241D] font-bold text-xs font-mono px-6 py-3.5 rounded-xl transition-all"
+              >
+                Access Administration Gate
+              </button>
+            </div>
           </div>
 
         </div>

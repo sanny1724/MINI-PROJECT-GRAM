@@ -34,7 +34,7 @@ export default function PublicDashboard() {
     const fetchDetails = async () => {
       setLoading(true);
       try {
-        const response = await api.get(`/lgd/villages/${villageCode}`);
+        const response = await api.get(`/villages/${villageCode}/dashboard`);
         setData(response.data);
         setError(null);
       } catch (err) {

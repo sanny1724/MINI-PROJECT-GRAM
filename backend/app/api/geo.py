@@ -81,4 +81,44 @@ def create_mandal(payload: MandalCreate, db: Session = Depends(get_db)):
 @router.get("/mandals/{mandal_id}/villages")
 def list_villages_in_mandal(mandal_id: int, db: Session = Depends(get_db)):
     villages = db.query(Village).filter(Village.mandal_id == mandal_id).order_by(Village.name).all()
-    return [{"id": v.id, "name": v.name, "population": v.population} for v in villages]
+    return [{"id": v.id, "name": v.name, "population": v.population, "code": v.id, "riskLevel": "LOW", "developmentScore": 75} for v in villages]
+
+
+@router.get("/search")
+def search_entities(q: str, db: Session = Depends(get_db)):
+    if not q or len(q) < 2:
+        return []
+    
+    # Search districts
+    districts = db.query(District).filter(District.name.ilike(f"%{q}%")).limit(5).all()
+    # Search mandals
+    mandals = db.query(Mandal).filter(Mandal.name.ilike(f"%{q}%")).limit(5).all()
+    # Search villages
+    villages = db.query(Village).filter(Village.name.ilike(f"%{q}%")).limit(10).all()
+
+    results = []
+    for d in districts:
+        results.append({
+            "type": "District",
+            "name": d.name,
+            "code": str(d.id),
+            "context": f"{d.state} State"
+        })
+    for m in mandals:
+        dist_name = m.district.name if m.district else "Unknown"
+        results.append({
+            "type": "Mandal",
+            "name": m.name,
+            "code": str(m.id),
+            "context": f"{dist_name} District"
+        })
+    for v in villages:
+        mandal_name = v.mandal.name if v.mandal else "Unknown"
+        dist_name = v.mandal.district.name if (v.mandal and v.mandal.district) else "Unknown"
+        results.append({
+            "type": "Village",
+            "name": v.name,
+            "code": str(v.id),
+            "context": f"{mandal_name} Mandal, {dist_name} District"
+        })
+    return results

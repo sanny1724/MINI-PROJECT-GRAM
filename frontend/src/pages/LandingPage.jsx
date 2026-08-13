@@ -498,114 +498,80 @@ export default function LandingPage() {
               </div>
 
               {/* Navigation Panels Underneath Map */}
-              <div className="flex-grow min-h-[180px] flex flex-col justify-between">
+              <div className="flex-grow min-h-[80px] flex flex-col justify-end">
                 
-                {/* 1. STATE VIEW: Select District */}
+                {/* 1. STATE VIEW: Clean placeholder instruction */}
                 {viewMode === 'state' && (
-                  <div className="flex-grow flex flex-col overflow-hidden">
-                    <span className="text-[11px] text-[#F2F0E6]/50 mb-1.5 block font-medium">Select District ({dbDistricts.length})</span>
-                    <div className="flex-grow overflow-y-auto max-h-[140px] pr-1 flex flex-col gap-1 custom-scroll">
-                      {dbDistricts.map(d => (
-                        <button
-                          key={d.id}
-                          onClick={() => handleDistrictListClick(d)}
-                          className="w-full text-left px-3 py-2.5 bg-[#16241D]/45 hover:bg-[#24382C]/60 border border-[#F2F0E6]/5 hover:border-[#C98A2E]/30 rounded-lg text-[11px] font-semibold text-[#F2F0E6] hover:text-[#C98A2E] transition-all flex justify-between items-center"
-                        >
-                          <span>{d.name}</span>
-                          <span className="text-[8px] font-mono text-[#F2F0E6]/40 uppercase shrink-0">District</span>
-                        </button>
-                      ))}
-                    </div>
+                  <div className="flex flex-col items-center justify-center py-4 text-center animate-fade-in">
+                    <span className="text-xs text-[#F2F0E6]/60 font-light leading-relaxed max-w-sm">
+                      Click any district on the map above to select and load its Mandals.
+                    </span>
                   </div>
                 )}
 
-                {/* 2. DISTRICT VIEW: Select Mandal */}
+                {/* 2. DISTRICT VIEW: Clean Mandal Select Dropdown */}
                 {viewMode === 'district' && selectedDistrict && (
-                  <div className="flex-grow flex flex-col overflow-hidden">
-                    <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-[11px] text-[#F2F0E6]/50 font-medium">Select Mandal of {selectedDistrict.name} ({mandalsList.length})</span>
-                      <button onClick={resetToState} className="text-[9px] font-mono text-[#C98A2E] hover:underline">← All Districts</button>
+                  <div className="flex flex-col gap-2.5 w-full animate-fade-in-up">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] text-[#F2F0E6]/50 font-medium">District: <strong className="text-white">{selectedDistrict.name}</strong></span>
+                      <button onClick={resetToState} className="text-[10px] font-mono text-[#C98A2E] hover:underline">← Back to State Map</button>
                     </div>
-                    <div className="flex-grow overflow-y-auto max-h-[140px] pr-1 flex flex-col gap-1 custom-scroll">
-                      {mandalsList.length === 0 ? (
-                        <div className="text-xs text-[#F2F0E6]/40 py-8 text-center animate-pulse">Loading Mandals...</div>
-                      ) : (
-                        mandalsList.map((m, idx) => (
-                          <button
-                            key={m.code}
-                            onClick={() => handleMandalListClick(m, idx)}
-                            className="w-full text-left px-3 py-2 bg-[#16241D]/45 hover:bg-[#24382C]/60 border border-[#F2F0E6]/5 hover:border-[#C98A2E]/30 rounded-lg text-[11px] font-semibold text-[#F2F0E6] hover:text-[#C98A2E] transition-all flex justify-between items-center"
-                          >
-                            <span>{m.name}</span>
-                            <span className="text-[8px] font-mono text-[#C98A2E] bg-[#C98A2E]/10 px-1.5 py-0.5 rounded-full border border-[#C98A2E]/20 shrink-0">{m.village_count || 0} Villages</span>
-                          </button>
-                        ))
-                      )}
-                    </div>
+                    <select
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        if (val !== "") {
+                          const idx = parseInt(val, 10);
+                          handleMandalListClick(mandalsList[idx], idx);
+                        }
+                      }}
+                      className="w-full bg-[#16241D] border border-[#F2F0E6]/10 focus:border-[#C98A2E] rounded-xl px-4 py-3 text-xs text-[#F2F0E6] outline-none cursor-pointer"
+                      defaultValue=""
+                    >
+                      <option value="" disabled>-- Choose a Mandal --</option>
+                      {mandalsList.map((m, idx) => (
+                        <option key={m.code} value={idx}>{m.name}</option>
+                      ))}
+                    </select>
                   </div>
                 )}
 
-                {/* 3. MANDAL VIEW: Select Village + Search */}
+                {/* 3. MANDAL VIEW: Clean Village Select Dropdown */}
                 {viewMode === 'mandal' && selectedMandal && (
-                  <div className="flex-grow flex flex-col overflow-hidden">
-                    <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-[11px] text-[#F2F0E6]/50 font-medium">Select Village of {selectedMandal.name} ({villagesList.length})</span>
-                      <button onClick={resetToDistrict} className="text-[9px] font-mono text-[#C98A2E] hover:underline">← {selectedDistrict.name} District</button>
+                  <div className="flex flex-col gap-2.5 w-full animate-fade-in-up">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] text-[#F2F0E6]/50 font-medium">Mandal: <strong className="text-white">{selectedMandal.name}</strong></span>
+                      <button onClick={resetToDistrict} className="text-[10px] font-mono text-[#C98A2E] hover:underline">← Back to Mandals</button>
                     </div>
-
-                    <div className="mb-2">
-                      <input
-                        type="text"
-                        placeholder="Search village..."
-                        value={villageSearchQuery}
-                        onChange={(e) => setVillageSearchQuery(e.target.value)}
-                        className="w-full bg-[#16241D] border border-[#F2F0E6]/10 focus:border-[#C98A2E] rounded-lg px-2.5 py-1.5 text-[11px] text-[#F2F0E6] outline-none"
-                      />
-                    </div>
-
-                    <div className="flex-grow overflow-y-auto max-h-[110px] pr-1 flex flex-col gap-1 custom-scroll">
-                      {villagesList.length === 0 ? (
-                        <div className="text-xs text-[#F2F0E6]/40 py-8 text-center animate-pulse">Loading Villages...</div>
-                      ) : (
-                        villagesList
-                          .filter(v => v.name.toLowerCase().includes(villageSearchQuery.toLowerCase()))
-                          .map(v => {
-                            const colorClass = v.riskLevel === 'LOW' ? 'text-green-400 border-green-500/20 bg-green-500/5' :
-                                               v.riskLevel === 'MEDIUM' ? 'text-yellow-400 border-yellow-500/20 bg-yellow-500/5' :
-                                               'text-red-400 border-red-500/20 bg-red-500/5';
-                            return (
-                              <button
-                                key={v.code}
-                                onClick={() => setSelectedVillageState(v)}
-                                className={`w-full text-left px-3 py-2 border rounded-lg text-[11px] font-semibold transition-all flex justify-between items-center ${
-                                  selectedVillageState && selectedVillageState.code === v.code
-                                    ? 'bg-[#C98A2E]/20 border-[#C98A2E] text-[#C98A2E]'
-                                    : 'bg-[#16241D]/45 hover:bg-[#24382C]/60 border-[#F2F0E6]/5 text-[#F2F0E6] hover:text-[#C98A2E]'
-                                }`}
-                              >
-                                <span>{v.name}</span>
-                                <span className={`text-[8px] font-mono px-1.5 py-0.5 rounded-full border shrink-0 ${colorClass}`}>{v.riskLevel || 'LOW'}</span>
-                              </button>
-                            );
-                          })
-                      )}
-                    </div>
+                    <select
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        const found = villagesList.find(v => v.code.toString() === val);
+                        if (found) setSelectedVillageState(found);
+                      }}
+                      className="w-full bg-[#16241D] border border-[#F2F0E6]/10 focus:border-[#C98A2E] rounded-xl px-4 py-3 text-xs text-[#F2F0E6] outline-none cursor-pointer"
+                      defaultValue=""
+                    >
+                      <option value="" disabled>-- Choose a Village --</option>
+                      {villagesList.map(v => (
+                        <option key={v.code} value={v.code}>{v.name}</option>
+                      ))}
+                    </select>
 
                     {/* 4. VILLAGE OVERVIEW: Preview Selection */}
                     {selectedVillageState && (
-                      <div className="mt-2 pt-2 border-t border-[#F2F0E6]/10 flex flex-col gap-1.5 animate-fade-in-up">
-                        <div className="flex justify-between items-center">
+                      <div className="mt-3 pt-3 border-t border-[#F2F0E6]/10 flex flex-col gap-2 animate-fade-in-up">
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-[#16241D]/90 border border-[#F2F0E6]/5 p-4 rounded-xl gap-3">
                           <div className="flex flex-col">
-                            <span className="text-[#C98A2E] font-bold text-xs uppercase tracking-wider">{selectedVillageState.name}</span>
-                            <span className="text-[9px] text-[#F2F0E6]/50 font-mono">
+                            <span className="text-[#C98A2E] font-bold text-xs uppercase tracking-wider font-heading">{selectedVillageState.name}</span>
+                            <span className="text-[9px] text-[#F2F0E6]/50 font-mono mt-0.5">
                               LGD Code: {selectedVillageState.code} • {selectedMandal.name} Mandal • {selectedDistrict.name} District
                             </span>
                           </div>
                           <button
                             onClick={() => navigate(`/public/village/${selectedVillageState.code}`)}
-                            className="bg-[#C98A2E] hover:bg-[#b07824] text-[#16241D] font-bold text-[10px] font-mono px-4 py-2 rounded-lg shadow-md transition-all shrink-0"
+                            className="bg-[#C98A2E] hover:bg-[#b07824] text-[#16241D] font-bold text-[10px] font-mono px-4 py-2.5 rounded-lg shadow-md transition-all shrink-0"
                           >
-                            View Village Dashboard →
+                            Access Dashboard →
                           </button>
                         </div>
                       </div>

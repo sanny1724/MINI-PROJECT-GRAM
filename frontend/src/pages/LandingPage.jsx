@@ -15,6 +15,30 @@ function getSeededRandom(seed) {
   return x - Math.floor(x);
 }
 
+const districtNameMapping = {
+  'gadwal': 'Jogulamba Gadwal',
+  'komaram bheem': 'Kumuram Bheem Asifabad',
+  'komaram bheem asifabad': 'Kumuram Bheem Asifabad',
+  'jayashankar': 'Jayashankar Bhupalapally',
+  'bhadradri': 'Bhadradri Kothagudem',
+  'yadadri': 'Yadadri Bhuvanagiri',
+  'jangaon': 'Jangoan',
+  'warangal(urban)': 'Hanumakonda',
+  'warangal(rural)': 'Warangal',
+  'jagtial': 'Jagitial',
+  'rajanna': 'Rajanna Sircilla',
+  'medchal': 'Medchal Malkajgiri',
+  'mahbubnagar': 'Mahabubnagar'
+};
+
+const getDbName = (jsName) => {
+  const norm = jsName.toLowerCase().trim();
+  if (districtNameMapping[norm]) {
+    return districtNameMapping[norm];
+  }
+  return jsName;
+};
+
 export default function LandingPage() {
   const navigate = useNavigate();
   
@@ -34,6 +58,13 @@ export default function LandingPage() {
   const [mandalsList, setMandalsList] = useState([]);
   const [villagesList, setVillagesList] = useState([]);
   const [dbDistricts, setDbDistricts] = useState([]);
+  const [villageSearchQuery, setVillageSearchQuery] = useState('');
+  const [selectedVillageState, setSelectedVillageState] = useState(null);
+
+  useEffect(() => {
+    setSelectedVillageState(null);
+    setVillageSearchQuery('');
+  }, [selectedMandal, selectedDistrict]);
 
   useEffect(() => {
     const fetchDbDistricts = async () => {
@@ -165,12 +196,13 @@ export default function LandingPage() {
   // Zoom to District handler
   const zoomToDistrict = async (districtName, districtCode, bbox) => {
     // Resolve DB ID using districtName mapping
+    const dbName = getDbName(districtName);
     const matched = dbDistricts.find(
-      d => d.name.toLowerCase() === districtName.toLowerCase()
+      d => d.name.toLowerCase() === dbName.toLowerCase()
     );
     const dbId = matched ? matched.id : (districtCode || 1);
 
-    setSelectedDistrict({ code: dbId, name: districtName, bbox });
+    setSelectedDistrict({ code: dbId, name: dbName, bbox });
     setSelectedMandal(null);
     setMandalsList([]);
     setVillagesList([]);
@@ -312,68 +344,329 @@ export default function LandingPage() {
         </div>
       </nav>
 
-      {/* SECTION 2 — HERO SECTION WITH BACKGROUND VIDEO */}
-      <section id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden">
+      {/* SECTION 2 — HERO SECTION WITH BACKGROUND VIDEO & INTERACTIVE SELECTOR */}
+      <section id="home" className="relative min-h-screen pt-28 pb-12 px-6 flex items-center justify-center overflow-hidden">
         {/* Background Cinematic Video */}
         <div className="absolute inset-0 w-full h-full object-cover z-0">
-          <video
-            autoPlay
-            loop
-            muted
-            playsInline
-            className="w-full h-full object-cover"
-            poster="src/assets/hero.png"
-          >
+          <video autoPlay loop muted playsInline className="w-full h-full object-cover" poster="src/assets/hero.png">
             <source src="/videos/telangana-heritage.mp4" type="video/mp4" />
           </video>
-          {/* Subtle dark green/black overlay to maximize readability and state identity */}
-          <div className="absolute inset-0 bg-gradient-to-b from-[#16241D]/90 via-[#16241D]/80 to-[#16241D]" />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#16241D]/95 via-[#16241D]/80 to-[#16241D]" />
         </div>
 
-        {/* Traditional Telangana Line/Architectural motifs (top/bottom borders) */}
+        {/* Traditional Telangana Line/Architectural motifs */}
         <div className="absolute top-24 left-0 right-0 h-1 bg-[repeating-linear-gradient(90deg,#C98A2E,#C98A2E_10px,transparent_10px,transparent_20px)] opacity-20 z-10" />
 
-        <div className="max-w-4xl mx-auto w-full px-6 text-center z-10 flex flex-col items-center gap-8 pt-16">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#24382C]/70 border border-[#C98A2E]/25 text-[10px] font-mono font-bold tracking-widest text-[#C98A2E] uppercase backdrop-blur-sm animate-fade-in">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#C98A2E] animate-ping" />
-            Telangana State Portal
-          </div>
+        <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-8 items-center z-10 pt-8">
           
-          <div className="flex flex-col gap-3">
-            <h1 className="font-heading font-black text-6xl md:text-8xl tracking-tight text-white leading-none">
-              GRAM
-            </h1>
-            <h2 className="font-heading font-bold text-lg md:text-2xl text-[#C98A2E] tracking-wider uppercase">
-              Governance Risk & Accountability Monitor
-            </h2>
+          {/* Left Column - Hero Text (5 cols) */}
+          <div className="lg:col-span-5 flex flex-col gap-6 text-left">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#24382C]/70 border border-[#C98A2E]/25 text-[10px] font-mono font-bold tracking-widest text-[#C98A2E] uppercase backdrop-blur-sm w-max animate-fade-in">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#C98A2E] animate-ping" />
+              Telangana State Portal
+            </div>
+            
+            <div className="flex flex-col gap-2">
+              <h1 className="font-heading font-black text-5xl md:text-7xl tracking-tight text-white leading-none">
+                GRAM
+              </h1>
+              <h2 className="font-heading font-bold text-base md:text-xl text-[#C98A2E] tracking-wider uppercase">
+                Governance Risk & Accountability Monitor
+              </h2>
+            </div>
+
+            <div className="flex flex-col gap-3">
+              <p className="font-heading text-lg md:text-2xl text-white font-normal italic leading-relaxed">
+                "Transparency for Every Village.<br />Accountability for Every Citizen."
+              </p>
+              <p className="text-xs md:text-sm text-[#F2F0E6]/70 leading-relaxed font-light max-w-md">
+                Connecting Telangana's villages, people and governance through transparent data and intelligent insights.
+              </p>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-3 mt-1">
+              <button 
+                onClick={() => {
+                  const sec = document.getElementById('story');
+                  if (sec) sec.scrollIntoView({ behavior: 'smooth' });
+                }}
+                className="bg-[#C98A2E] hover:bg-[#b07824] text-[#16241D] font-bold text-xs px-6 py-3.5 rounded-xl shadow-lg shadow-[#C98A2E]/20 transition-all flex items-center justify-center gap-2 group"
+              >
+                Explore Your Village
+                <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+              </button>
+              <button 
+                onClick={() => navigate('/login')}
+                className="border border-[#F2F0E6]/25 hover:border-[#C98A2E] hover:bg-[#24382C]/30 text-[#F2F0E6] font-bold text-xs px-6 py-3.5 rounded-xl transition-all flex items-center justify-center gap-2 backdrop-blur-sm"
+              >
+                Officer Login
+              </button>
+            </div>
           </div>
 
-          <div className="flex flex-col gap-4 max-w-2xl">
-            <p className="font-heading text-xl md:text-3xl text-white font-normal italic leading-relaxed">
-              "Transparency for Every Village. Accountability for Every Citizen."
-            </p>
-            <p className="text-sm md:text-base text-[#F2F0E6]/70 leading-relaxed font-light">
-              Connecting Telangana's villages, people and governance through transparent data and intelligent insights.
-            </p>
-          </div>
+          {/* Right Column - Map & Dropdowns selector (7 cols) */}
+          <div className="lg:col-span-7 flex flex-col justify-center">
+            <div className="w-full bg-[#24382C]/40 border border-[#F2F0E6]/10 rounded-3xl p-6 backdrop-blur-md shadow-2xl flex flex-col gap-4">
+              
+              {/* Header and Breadcrumbs */}
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center justify-between border-b border-[#F2F0E6]/5 pb-2">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-[#C98A2E] rounded-full animate-pulse" />
+                    <h3 className="font-heading font-bold text-sm text-white">Explore Telangana</h3>
+                  </div>
+                  <button 
+                    onClick={resetToState}
+                    className="text-[10px] font-mono font-bold text-[#C98A2E] hover:underline"
+                  >
+                    Reset Explorer
+                  </button>
+                </div>
 
-          <div className="flex flex-col sm:flex-row gap-4 mt-2">
-            <button 
-              onClick={() => {
-                const sec = document.getElementById('explore');
-                if (sec) sec.scrollIntoView({ behavior: 'smooth' });
-              }}
-              className="bg-[#C98A2E] hover:bg-[#b07824] text-[#16241D] font-bold text-sm px-8 py-4 rounded-xl shadow-lg shadow-[#C98A2E]/20 transition-all flex items-center justify-center gap-2.5 group"
-            >
-              Explore Your Village
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </button>
-            <button 
-              onClick={() => navigate('/login')}
-              className="border border-[#F2F0E6]/25 hover:border-[#C98A2E] hover:bg-[#24382C]/30 text-[#F2F0E6] font-bold text-sm px-8 py-4 rounded-xl transition-all flex items-center justify-center gap-2 backdrop-blur-sm"
-            >
-              Officer Login
-            </button>
+                {/* Clickable Breadcrumbs */}
+                <div className="flex flex-wrap items-center gap-1 text-[10px] text-[#F2F0E6]/60 bg-[#16241D]/55 px-3 py-1.5 rounded-xl font-mono">
+                  <button onClick={resetToState} className="hover:text-[#C98A2E] transition-colors">Telangana</button>
+                  {selectedDistrict && (
+                    <>
+                      <span>/</span>
+                      <button onClick={resetToDistrict} className="hover:text-[#C98A2E] transition-colors truncate max-w-[100px]">{selectedDistrict.name}</button>
+                    </>
+                  )}
+                  {selectedMandal && (
+                    <>
+                      <span>/</span>
+                      <span className="text-white truncate max-w-[100px]">{selectedMandal.name}</span>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              {/* Map on Right/Top (Centered in panel) */}
+              <div className="aspect-[93/60] w-full max-h-[220px] flex items-center justify-center relative overflow-hidden bg-[#16241D]/45 border border-[#F2F0E6]/5 rounded-2xl p-4">
+                <svg
+                  ref={mapSvgRef}
+                  viewBox={viewBox}
+                  className="w-full h-full object-contain transition-all duration-700 ease-out"
+                  style={{ transformOrigin: 'center' }}
+                >
+                  {/* District Paths */}
+                  {telanganaMapData.districts.map((d) => {
+                    const isActive = selectedDistrict && selectedDistrict.name === d.name;
+                    const isDimmed = selectedDistrict && selectedDistrict.name !== d.name;
+                    return (
+                      <path
+                        key={`hero-${d.id}`}
+                        d={d.d}
+                        name={d.name}
+                        className={`tg-map-district ${isActive ? 'active' : ''}`}
+                        style={{
+                          opacity: isDimmed ? 0.08 : 1,
+                          pointerEvents: viewMode === 'state' ? 'auto' : 'none'
+                        }}
+                        onMouseEnter={() => setHoveredDistrict(d.name)}
+                        onMouseLeave={() => setHoveredDistrict(null)}
+                        onClick={(e) => handleDistrictPathClick(d, e)}
+                      />
+                    );
+                  })}
+
+                  {/* Mandal Centroids */}
+                  {viewMode === 'district' && selectedDistrict && mandalsList.map((m, idx) => {
+                    const bbox = selectedDistrict.bbox;
+                    const seedX = m.code * 2;
+                    const seedY = m.code * 3;
+                    const mX = bbox.x + bbox.width * (0.25 + getSeededRandom(seedX) * 0.5);
+                    const mY = bbox.y + bbox.height * (0.25 + getSeededRandom(seedY) * 0.5);
+                    
+                    return (
+                      <circle
+                        key={`hero-mandal-${m.code}`}
+                        cx={mX}
+                        cy={mY}
+                        r={bbox.width * 0.025 + 1}
+                        fill="#C98A2E"
+                        fillOpacity="0.8"
+                        stroke="#ffffff"
+                        strokeWidth={bbox.width * 0.005}
+                        className="animate-pulse cursor-pointer"
+                        onMouseEnter={() => setHoveredMandal(m)}
+                        onMouseLeave={() => setHoveredMandal(null)}
+                        onClick={(e) => zoomToMandal(m, idx, e.target.getBBox())}
+                      />
+                    );
+                  })}
+
+                  {/* Village Dots */}
+                  {viewMode === 'mandal' && selectedMandal && villagesList.map((v, idx) => {
+                    const mX = selectedMandal.x;
+                    const mY = selectedMandal.y;
+                    const angle = getSeededRandom(v.code * 4) * Math.PI * 2;
+                    const dist = 3 + getSeededRandom(v.code * 5) * 12;
+                    const vX = mX + Math.cos(angle) * dist;
+                    const vY = mY + Math.sin(angle) * dist;
+                    const color = v.riskLevel === 'LOW' ? '#66bb6a' : v.riskLevel === 'MEDIUM' ? '#ffa726' : '#ef5350';
+
+                    return (
+                      <circle
+                        key={`hero-village-${v.code}`}
+                        cx={vX}
+                        cy={vY}
+                        r={0.8}
+                        fill={color}
+                        stroke="#ffffff"
+                        strokeWidth="0.15"
+                        className="grid-cell-dot cursor-pointer"
+                        onMouseEnter={() => setHoveredVillage(v)}
+                        onMouseLeave={() => setHoveredVillage(null)}
+                        onClick={() => setSelectedVillageState(v)}
+                      />
+                    );
+                  })}
+                </svg>
+
+                {/* Tooltip Overlay */}
+                <div className="absolute bottom-2 left-2 right-2 bg-[#16241D] border border-[#F2F0E6]/10 px-3 py-1.5 rounded-xl text-[10px] shadow-lg pointer-events-none flex flex-col z-20">
+                  {hoveredDistrict && (
+                    <>
+                      <span className="text-[#C98A2E] font-bold font-heading">{hoveredDistrict}</span>
+                      <span className="text-[8px] text-[#F2F0E6]/60 font-mono">District (Click to explore)</span>
+                    </>
+                  )}
+                  {hoveredMandal && !hoveredDistrict && (
+                    <>
+                      <span className="text-[#C98A2E] font-bold font-heading">{hoveredMandal.name}</span>
+                      <span className="text-[8px] text-[#F2F0E6]/60 font-mono">Mandal Code: {hoveredMandal.code}</span>
+                    </>
+                  )}
+                  {hoveredVillage && !hoveredMandal && !hoveredDistrict && (
+                    <>
+                      <span className="text-[#C98A2E] font-bold font-heading">{hoveredVillage.name}</span>
+                      <span className="text-[8px] text-[#F2F0E6]/60 font-mono">LGD Code: {hoveredVillage.code}</span>
+                    </>
+                  )}
+                  {!hoveredDistrict && !hoveredMandal && !hoveredVillage && (
+                    <span className="text-[#F2F0E6]/50">Hover map to explore</span>
+                  )}
+                </div>
+              </div>
+
+              {/* Navigation Panels Underneath Map */}
+              <div className="flex-grow min-h-[180px] flex flex-col justify-between">
+                
+                {/* 1. STATE VIEW: Select District */}
+                {viewMode === 'state' && (
+                  <div className="flex-grow flex flex-col overflow-hidden">
+                    <span className="text-[11px] text-[#F2F0E6]/50 mb-1.5 block font-medium">Select District ({dbDistricts.length})</span>
+                    <div className="flex-grow overflow-y-auto max-h-[140px] pr-1 flex flex-col gap-1 custom-scroll">
+                      {dbDistricts.map(d => (
+                        <button
+                          key={d.id}
+                          onClick={() => handleDistrictListClick(d)}
+                          className="w-full text-left px-3 py-2.5 bg-[#16241D]/45 hover:bg-[#24382C]/60 border border-[#F2F0E6]/5 hover:border-[#C98A2E]/30 rounded-lg text-[11px] font-semibold text-[#F2F0E6] hover:text-[#C98A2E] transition-all flex justify-between items-center"
+                        >
+                          <span>{d.name}</span>
+                          <span className="text-[8px] font-mono text-[#F2F0E6]/40 uppercase shrink-0">District</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* 2. DISTRICT VIEW: Select Mandal */}
+                {viewMode === 'district' && selectedDistrict && (
+                  <div className="flex-grow flex flex-col overflow-hidden">
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span className="text-[11px] text-[#F2F0E6]/50 font-medium">Select Mandal of {selectedDistrict.name} ({mandalsList.length})</span>
+                      <button onClick={resetToState} className="text-[9px] font-mono text-[#C98A2E] hover:underline">← All Districts</button>
+                    </div>
+                    <div className="flex-grow overflow-y-auto max-h-[140px] pr-1 flex flex-col gap-1 custom-scroll">
+                      {mandalsList.length === 0 ? (
+                        <div className="text-xs text-[#F2F0E6]/40 py-8 text-center animate-pulse">Loading Mandals...</div>
+                      ) : (
+                        mandalsList.map((m, idx) => (
+                          <button
+                            key={m.code}
+                            onClick={() => handleMandalListClick(m, idx)}
+                            className="w-full text-left px-3 py-2 bg-[#16241D]/45 hover:bg-[#24382C]/60 border border-[#F2F0E6]/5 hover:border-[#C98A2E]/30 rounded-lg text-[11px] font-semibold text-[#F2F0E6] hover:text-[#C98A2E] transition-all flex justify-between items-center"
+                          >
+                            <span>{m.name}</span>
+                            <span className="text-[8px] font-mono text-[#C98A2E] bg-[#C98A2E]/10 px-1.5 py-0.5 rounded-full border border-[#C98A2E]/20 shrink-0">{m.village_count || 0} Villages</span>
+                          </button>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* 3. MANDAL VIEW: Select Village + Search */}
+                {viewMode === 'mandal' && selectedMandal && (
+                  <div className="flex-grow flex flex-col overflow-hidden">
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span className="text-[11px] text-[#F2F0E6]/50 font-medium">Select Village of {selectedMandal.name} ({villagesList.length})</span>
+                      <button onClick={resetToDistrict} className="text-[9px] font-mono text-[#C98A2E] hover:underline">← {selectedDistrict.name} District</button>
+                    </div>
+
+                    <div className="mb-2">
+                      <input
+                        type="text"
+                        placeholder="Search village..."
+                        value={villageSearchQuery}
+                        onChange={(e) => setVillageSearchQuery(e.target.value)}
+                        className="w-full bg-[#16241D] border border-[#F2F0E6]/10 focus:border-[#C98A2E] rounded-lg px-2.5 py-1.5 text-[11px] text-[#F2F0E6] outline-none"
+                      />
+                    </div>
+
+                    <div className="flex-grow overflow-y-auto max-h-[110px] pr-1 flex flex-col gap-1 custom-scroll">
+                      {villagesList.length === 0 ? (
+                        <div className="text-xs text-[#F2F0E6]/40 py-8 text-center animate-pulse">Loading Villages...</div>
+                      ) : (
+                        villagesList
+                          .filter(v => v.name.toLowerCase().includes(villageSearchQuery.toLowerCase()))
+                          .map(v => {
+                            const colorClass = v.riskLevel === 'LOW' ? 'text-green-400 border-green-500/20 bg-green-500/5' :
+                                               v.riskLevel === 'MEDIUM' ? 'text-yellow-400 border-yellow-500/20 bg-yellow-500/5' :
+                                               'text-red-400 border-red-500/20 bg-red-500/5';
+                            return (
+                              <button
+                                key={v.code}
+                                onClick={() => setSelectedVillageState(v)}
+                                className={`w-full text-left px-3 py-2 border rounded-lg text-[11px] font-semibold transition-all flex justify-between items-center ${
+                                  selectedVillageState && selectedVillageState.code === v.code
+                                    ? 'bg-[#C98A2E]/20 border-[#C98A2E] text-[#C98A2E]'
+                                    : 'bg-[#16241D]/45 hover:bg-[#24382C]/60 border-[#F2F0E6]/5 text-[#F2F0E6] hover:text-[#C98A2E]'
+                                }`}
+                              >
+                                <span>{v.name}</span>
+                                <span className={`text-[8px] font-mono px-1.5 py-0.5 rounded-full border shrink-0 ${colorClass}`}>{v.riskLevel || 'LOW'}</span>
+                              </button>
+                            );
+                          })
+                      )}
+                    </div>
+
+                    {/* 4. VILLAGE OVERVIEW: Preview Selection */}
+                    {selectedVillageState && (
+                      <div className="mt-2 pt-2 border-t border-[#F2F0E6]/10 flex flex-col gap-1.5 animate-fade-in-up">
+                        <div className="flex justify-between items-center">
+                          <div className="flex flex-col">
+                            <span className="text-[#C98A2E] font-bold text-xs uppercase tracking-wider">{selectedVillageState.name}</span>
+                            <span className="text-[9px] text-[#F2F0E6]/50 font-mono">
+                              LGD Code: {selectedVillageState.code} • {selectedMandal.name} Mandal • {selectedDistrict.name} District
+                            </span>
+                          </div>
+                          <button
+                            onClick={() => navigate(`/public/village/${selectedVillageState.code}`)}
+                            className="bg-[#C98A2E] hover:bg-[#b07824] text-[#16241D] font-bold text-[10px] font-mono px-4 py-2 rounded-lg shadow-md transition-all shrink-0"
+                          >
+                            View Village Dashboard →
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -487,253 +780,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* SECTION 5 — EXPLORE TELANGANA */}
-      <section id="explore" className="py-24 px-6 bg-[#24382C]/30 border-y border-[#F2F0E6]/10 relative">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,rgba(201,138,46,0.05),transparent_40%)] pointer-events-none" />
 
-        <div className="max-w-4xl mx-auto text-center flex flex-col items-center gap-6 mb-12">
-          <span className="text-xs font-mono font-bold tracking-widest text-[#C98A2E] uppercase">GIS Interface</span>
-          <h2 className="font-heading text-4xl md:text-5xl text-white font-bold leading-tight">Explore Telangana State</h2>
-          <p className="text-sm text-[#F2F0E6]/70 max-w-xl">
-            Search for your village LGD data, mandal summaries, or explore district-level accountability indexes directly using our central database search box or map portal below.
-          </p>
-
-          {/* Autocomplete Search Box */}
-          <div className="relative w-full max-w-lg mt-4" ref={dropdownRef}>
-            <div className="flex items-center bg-[#16241D] border border-[#F2F0E6]/15 focus-within:border-[#C98A2E] rounded-xl px-4 py-3 shadow-lg transition-all">
-              <Search className="w-5 h-5 text-[#C98A2E] mr-3" />
-              <input
-                type="text"
-                placeholder="Search Village, Mandal or District..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onFocus={() => setShowDropdown(true)}
-                className="w-full bg-transparent text-sm text-[#F2F0E6] outline-none placeholder:text-[#F2F0E6]/40 font-heading"
-              />
-            </div>
-
-            {/* Dropdown list */}
-            {showDropdown && searchResults.length > 0 && (
-              <div className="absolute top-full left-0 right-0 mt-2 bg-[#16241D] border border-[#F2F0E6]/10 rounded-xl shadow-2xl overflow-hidden z-30 max-h-[300px] overflow-y-auto custom-scroll">
-                {searchResults.map((item, idx) => (
-                  <div
-                    key={idx}
-                    onClick={() => handleSearchSelect(item)}
-                    className="flex items-center justify-between px-4 py-3 hover:bg-[#24382C]/50 cursor-pointer border-b border-[#F2F0E6]/5 last:border-b-0 transition-colors"
-                  >
-                    <div className="flex flex-col items-start">
-                      <span className="text-sm font-semibold text-[#F2F0E6]">{item.name}</span>
-                      <span className="text-[10px] text-[#F2F0E6]/50">{item.context}</span>
-                    </div>
-                    <span className="text-[10px] font-mono font-bold uppercase tracking-wider bg-[#C98A2E]/10 text-[#C98A2E] border border-[#C98A2E]/25 px-2.5 py-0.5 rounded-full">
-                      {item.type}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {showDropdown && searchQuery.length >= 2 && searchResults.length === 0 && (
-              <div className="absolute top-full left-0 right-0 mt-2 bg-[#16241D] border border-[#F2F0E6]/10 rounded-xl px-4 py-3 text-sm text-[#F2F0E6]/40 z-30 text-center">
-                No results found
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Split screen Map & LGD Explorer Panel */}
-        <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
-          
-          {/* Map Pane (7 Columns) */}
-          <div className="lg:col-span-7 bg-[#16241D]/90 border border-[#F2F0E6]/10 rounded-3xl p-6 shadow-2xl flex flex-col justify-between min-h-[480px]">
-            <div className="flex items-center justify-between mb-4 border-b border-[#F2F0E6]/5 pb-4">
-              <div className="flex items-center gap-2">
-                <div className="w-2.5 h-2.5 bg-[#C98A2E] rounded-full animate-ping" />
-                <h3 className="font-heading font-bold text-lg text-white">Live LGD Map</h3>
-              </div>
-              <button 
-                onClick={resetToState}
-                className="text-xs font-mono font-bold text-[#C98A2E] hover:underline"
-              >
-                Reset Map View
-              </button>
-            </div>
-
-            <div className="aspect-[93/80] w-full flex items-center justify-center">
-              {/* Embedded interactive map duplicating Hero map for exploration ease */}
-              <svg
-                viewBox={viewBox}
-                className="w-full h-full max-h-[400px] object-contain transition-all duration-700 ease-out"
-                style={{ transformOrigin: 'center' }}
-              >
-                {telanganaMapData.districts.map((d) => {
-                  const isActive = selectedDistrict && selectedDistrict.name === d.name;
-                  const isDimmed = selectedDistrict && selectedDistrict.name !== d.name;
-                  return (
-                    <path
-                      key={`explore-${d.id}`}
-                      d={d.d}
-                      name={d.name}
-                      className={`tg-map-district ${isActive ? 'active' : ''}`}
-                      style={{
-                        opacity: isDimmed ? 0.08 : 1,
-                        pointerEvents: viewMode === 'state' ? 'auto' : 'none'
-                      }}
-                      onMouseEnter={() => setHoveredDistrict(d.name)}
-                      onMouseLeave={() => setHoveredDistrict(null)}
-                      onClick={(e) => handleDistrictPathClick(d, e)}
-                    />
-                  );
-                })}
-
-                {viewMode === 'district' && selectedDistrict && mandalsList.map((m, idx) => {
-                  const bbox = selectedDistrict.bbox;
-                  const seedX = m.code * 2;
-                  const seedY = m.code * 3;
-                  const mX = bbox.x + bbox.width * (0.25 + getSeededRandom(seedX) * 0.5);
-                  const mY = bbox.y + bbox.height * (0.25 + getSeededRandom(seedY) * 0.5);
-                  
-                  return (
-                    <circle
-                      key={`explore-mandal-${m.code}`}
-                      cx={mX}
-                      cy={mY}
-                      r={bbox.width * 0.025 + 1}
-                      fill="#C98A2E"
-                      fillOpacity="0.8"
-                      stroke="#ffffff"
-                      strokeWidth={bbox.width * 0.005}
-                      className="animate-pulse cursor-pointer"
-                      onMouseEnter={() => setHoveredMandal(m)}
-                      onMouseLeave={() => setHoveredMandal(null)}
-                      onClick={(e) => zoomToMandal(m, idx, e.target.getBBox())}
-                    />
-                  );
-                })}
-
-                {viewMode === 'mandal' && selectedMandal && villagesList.map((v, idx) => {
-                  const mX = selectedMandal.x;
-                  const mY = selectedMandal.y;
-                  const angle = getSeededRandom(v.code * 4) * Math.PI * 2;
-                  const dist = 3 + getSeededRandom(v.code * 5) * 12;
-                  const vX = mX + Math.cos(angle) * dist;
-                  const vY = mY + Math.sin(angle) * dist;
-                  const color = v.riskLevel === 'LOW' ? '#66bb6a' : v.riskLevel === 'MEDIUM' ? '#ffa726' : '#ef5350';
-
-                  return (
-                    <circle
-                      key={`explore-village-${v.code}`}
-                      cx={vX}
-                      cy={vY}
-                      r={0.8}
-                      fill={color}
-                      stroke="#ffffff"
-                      strokeWidth="0.15"
-                      className="grid-cell-dot cursor-pointer"
-                      onMouseEnter={() => setHoveredVillage(v)}
-                      onMouseLeave={() => setHoveredVillage(null)}
-                      onClick={() => navigate(`/public/village/${v.code}`)}
-                    />
-                  );
-                })}
-              </svg>
-            </div>
-          </div>
-
-          {/* List Hierarchy Explorer (5 Columns) */}
-          <div className="lg:col-span-5 bg-[#24382C]/30 border border-[#F2F0E6]/10 rounded-3xl p-6 shadow-2xl flex flex-col justify-between min-h-[480px]">
-            <div className="flex flex-col gap-1 border-b border-[#F2F0E6]/5 pb-3 mb-4">
-              <span className="text-[10px] font-mono font-bold text-[#C98A2E] uppercase">Explore Hierarchy</span>
-              <h3 className="font-heading font-bold text-lg text-white">LGD Explorer</h3>
-            </div>
-
-            {/* Breadcrumb Path */}
-            <div className="flex flex-wrap items-center gap-1.5 text-[11px] text-[#F2F0E6]/60 mb-4 bg-[#16241D]/55 px-3.5 py-2 rounded-xl font-mono">
-              <button onClick={resetToState} className="hover:text-[#C98A2E] transition-colors">Telangana</button>
-              {selectedDistrict && (
-                <>
-                  <span>/</span>
-                  <button onClick={resetToDistrict} className="hover:text-[#C98A2E] transition-colors">{selectedDistrict.name}</button>
-                </>
-              )}
-              {selectedMandal && (
-                <>
-                  <span>/</span>
-                  <span className="text-white">{selectedMandal.name}</span>
-                </>
-              )}
-            </div>
-
-            {/* Lists based on View Mode */}
-            {viewMode === 'state' && (
-              <div className="flex-grow flex flex-col overflow-hidden">
-                <span className="text-xs text-[#F2F0E6]/50 mb-2 block font-medium">Select District ({telanganaMapData.districts.length})</span>
-                <div className="flex-grow overflow-y-auto max-h-[300px] pr-1 flex flex-col gap-1.5 custom-scroll">
-                  {telanganaMapData.districts.map(d => (
-                    <button
-                      key={d.code}
-                      onClick={() => handleDistrictListClick(d)}
-                      className="w-full text-left px-4 py-2.5 bg-[#16241D]/45 hover:bg-[#24382C]/60 border border-[#F2F0E6]/5 hover:border-[#C98A2E]/30 rounded-xl text-xs font-semibold text-[#F2F0E6] hover:text-[#C98A2E] transition-all flex justify-between items-center"
-                    >
-                      <span>{d.name}</span>
-                      <span className="text-[9px] font-mono text-[#F2F0E6]/40 uppercase">District</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {viewMode === 'district' && selectedDistrict && (
-              <div className="flex-grow flex flex-col overflow-hidden">
-                <span className="text-xs text-[#F2F0E6]/50 mb-2 block font-medium">Select Mandal ({mandalsList.length})</span>
-                <div className="flex-grow overflow-y-auto max-h-[300px] pr-1 flex flex-col gap-1.5 custom-scroll">
-                  {mandalsList.length === 0 ? (
-                    <div className="text-xs text-[#F2F0E6]/40 py-8 text-center animate-pulse">Loading Mandals...</div>
-                  ) : (
-                    mandalsList.map((m, idx) => (
-                      <button
-                        key={m.code}
-                        onClick={() => handleMandalListClick(m, idx)}
-                        className="w-full text-left px-4 py-2.5 bg-[#16241D]/45 hover:bg-[#24382C]/60 border border-[#F2F0E6]/5 hover:border-[#C98A2E]/30 rounded-xl text-xs font-semibold text-[#F2F0E6] hover:text-[#C98A2E] transition-all flex justify-between items-center"
-                      >
-                        <span>{m.name}</span>
-                        <span className="text-[9px] font-mono text-[#C98A2E] bg-[#C98A2E]/10 px-2 py-0.5 rounded-full border border-[#C98A2E]/20">{m.village_count || m.villageCount || 0} Villages</span>
-                      </button>
-                    ))
-                  )}
-                </div>
-              </div>
-            )}
-
-            {viewMode === 'mandal' && selectedMandal && (
-              <div className="flex-grow flex flex-col overflow-hidden">
-                <span className="text-xs text-[#F2F0E6]/50 mb-2 block font-medium">Select Village ({villagesList.length})</span>
-                <div className="flex-grow overflow-y-auto max-h-[300px] pr-1 flex flex-col gap-1.5 custom-scroll">
-                  {villagesList.length === 0 ? (
-                    <div className="text-xs text-[#F2F0E6]/40 py-8 text-center animate-pulse">Loading Villages...</div>
-                  ) : (
-                    villagesList.map(v => {
-                      const colorClass = v.riskLevel === 'LOW' ? 'text-green-400 border-green-500/20 bg-green-500/5' :
-                                         v.riskLevel === 'MEDIUM' ? 'text-yellow-400 border-yellow-500/20 bg-yellow-500/5' :
-                                         'text-red-400 border-red-500/20 bg-red-500/5';
-                      return (
-                        <button
-                          key={v.code}
-                          onClick={() => navigate(`/public/village/${v.code}`)}
-                          className="w-full text-left px-4 py-2.5 bg-[#16241D]/45 hover:bg-[#24382C]/60 border border-[#F2F0E6]/5 hover:border-[#C98A2E]/30 rounded-xl text-xs font-semibold text-[#F2F0E6] hover:text-[#C98A2E] transition-all flex justify-between items-center"
-                        >
-                          <span>{v.name}</span>
-                          <span className={`text-[9px] font-mono px-2 py-0.5 rounded-full border ${colorClass}`}>{v.riskLevel || 'LOW'} RISK</span>
-                        </button>
-                      );
-                    })
-                  )}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </section>
 
       {/* SECTION 6 — PUBLIC VILLAGE DASHBOARD PREVIEW */}
       <section className="py-24 px-6 max-w-7xl mx-auto">

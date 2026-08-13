@@ -447,7 +447,7 @@ export default function LandingPage() {
                   ref={mapSvgRef}
                   viewBox={viewBox}
                   className="w-full h-full object-contain transition-all duration-700 ease-out"
-                  style={{ transformOrigin: 'center' }}
+                  style={{ transformOrigin: 'center', filter: 'drop-shadow(0px 8px 12px rgba(0,0,0,0.45))' }}
                 >
                   {/* District Paths */}
                   {telanganaMapData.districts.map((d) => {
@@ -466,59 +466,6 @@ export default function LandingPage() {
                         onMouseEnter={() => setHoveredDistrict(d.name)}
                         onMouseLeave={() => setHoveredDistrict(null)}
                         onClick={(e) => handleDistrictPathClick(d, e)}
-                      />
-                    );
-                  })}
-
-                  {/* Mandal Centroids */}
-                  {viewMode === 'district' && selectedDistrict && mandalsList.map((m, idx) => {
-                    const bbox = selectedDistrict.bbox;
-                    const seedX = m.code * 2;
-                    const seedY = m.code * 3;
-                    const mX = bbox.x + bbox.width * (0.25 + getSeededRandom(seedX) * 0.5);
-                    const mY = bbox.y + bbox.height * (0.25 + getSeededRandom(seedY) * 0.5);
-                    
-                    return (
-                      <circle
-                        key={`hero-mandal-${m.code}`}
-                        cx={mX}
-                        cy={mY}
-                        r={bbox.width * 0.025 + 1}
-                        fill="#C98A2E"
-                        fillOpacity="0.8"
-                        stroke="#ffffff"
-                        strokeWidth={bbox.width * 0.005}
-                        className="animate-pulse cursor-pointer"
-                        onMouseEnter={() => setHoveredMandal(m)}
-                        onMouseLeave={() => setHoveredMandal(null)}
-                        onClick={(e) => zoomToMandal(m, idx, e.target.getBBox())}
-                      />
-                    );
-                  })}
-
-                  {/* Village Dots */}
-                  {viewMode === 'mandal' && selectedMandal && villagesList.map((v, idx) => {
-                    const mX = selectedMandal.x;
-                    const mY = selectedMandal.y;
-                    const angle = getSeededRandom(v.code * 4) * Math.PI * 2;
-                    const dist = 3 + getSeededRandom(v.code * 5) * 12;
-                    const vX = mX + Math.cos(angle) * dist;
-                    const vY = mY + Math.sin(angle) * dist;
-                    const color = v.riskLevel === 'LOW' ? '#66bb6a' : v.riskLevel === 'MEDIUM' ? '#ffa726' : '#ef5350';
-
-                    return (
-                      <circle
-                        key={`hero-village-${v.code}`}
-                        cx={vX}
-                        cy={vY}
-                        r={0.8}
-                        fill={color}
-                        stroke="#ffffff"
-                        strokeWidth="0.15"
-                        className="grid-cell-dot cursor-pointer"
-                        onMouseEnter={() => setHoveredVillage(v)}
-                        onMouseLeave={() => setHoveredVillage(null)}
-                        onClick={() => setSelectedVillageState(v)}
                       />
                     );
                   })}

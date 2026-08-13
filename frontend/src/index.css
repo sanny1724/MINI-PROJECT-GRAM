@@ -1458,25 +1458,25 @@ body {
 
 /* Dynamic Map SVG styling */
 .tg-map-district {
-  fill: rgba(36, 56, 44, 0.4);
-  stroke: rgba(242, 240, 230, 0.2);
-  stroke-width: 0.5px;
+  fill: #ffffff;
+  stroke: #d8d6cc;
+  stroke-width: 1px;
   transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
 }
 
 .tg-map-district:hover {
-  fill: rgba(201, 138, 46, 0.25) !important;
-  stroke: var(--primary) !important;
+  fill: #C98A2E !important;
+  stroke: #ffffff !important;
   stroke-width: 1.5px !important;
-  filter: drop-shadow(0 0 15px rgba(201, 138, 46, 0.4));
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.25));
 }
 
 .tg-map-district.active {
-  fill: rgba(201, 138, 46, 0.7) !important;
+  fill: #C98A2E !important;
   stroke: #ffffff !important;
   stroke-width: 2px !important;
-  filter: drop-shadow(0 0 20px rgba(201, 138, 46, 0.6));
+  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.4));
 }
 
 /* Styled overlay maps */

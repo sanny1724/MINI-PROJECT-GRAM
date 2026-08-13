@@ -75,6 +75,23 @@ export default function LandingPage() {
     setVillageSearchQuery('');
   }, [selectedMandal, selectedDistrict]);
 
+  // Enable scrolling for LandingPage
+  useEffect(() => {
+    const origOverflow = document.body.style.overflow;
+    const origHeight = document.body.style.height;
+    const origWidth = document.body.style.width;
+
+    document.body.style.overflow = 'auto';
+    document.body.style.height = 'auto';
+    document.body.style.width = 'auto';
+
+    return () => {
+      document.body.style.overflow = origOverflow;
+      document.body.style.height = origHeight;
+      document.body.style.width = origWidth;
+    };
+  }, []);
+
   useEffect(() => {
     const fetchDbDistricts = async () => {
       try {

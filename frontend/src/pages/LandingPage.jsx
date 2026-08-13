@@ -1184,6 +1184,7 @@ export default function LandingPage() {
           </div>
 
         </div>
+      </footer>
       {/* Dynamic Pop-up Modal Wizard */}
       {isNavigationModalOpen && modalSelectedDistrict && (
         <div className="fixed inset-0 bg-[#16241D]/95 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-fade-in">

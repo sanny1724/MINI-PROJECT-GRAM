@@ -144,35 +144,75 @@ def get_village_dashboard(village_id: int, db: Session = Depends(get_db)):
             {"id": 2, "name": "M. Srinivas", "designation": "Panchayat Secretary", "contact": "9440392011"}
         ]
         
-    # 4. schemes
-    schemes_list = [
-        {"id": 1, "name": "Mission Bhagiratha (Drinking Water)", "allocatedBudget": 1500000, "spentBudget": 1450000, "status": "Completed"},
-        {"id": 2, "name": "Rythu Bandhu (Farmer Support)", "allocatedBudget": 2800000, "spentBudget": 2800000, "status": "Completed"},
-        {"id": 3, "name": "Mana Ooru - Mana Badi (School Dev)", "allocatedBudget": 1200000, "spentBudget": 850000, "status": "In Progress"},
-        {"id": 4, "name": "Basti Dawakhana Clinic Upgrades", "allocatedBudget": 800000, "spentBudget": 300000, "status": "In Progress"}
-    ]
+    # 4. schemes (Dynamic from budgets table)
+    from app.models.budget import Budget
+    db_budgets = db.query(Budget).filter(Budget.village_id == village.id).all()
     
-    # 5. budgets
-    budgets_list = [{
-        "year": "2026-2027",
-        "totalAllocation": 6300000,
-        "totalSpent": 5400000,
-        "infrastructureAlloc": 3500000,
-        "welfareAlloc": 2800000
-    }]
-    
-    # 6. grievances
+    schemes_list = []
+    for b in db_budgets:
+        status = "Completed" if b.utilized_amount >= b.allocated_amount else "In Progress"
+        schemes_list.append({
+            "id": b.id,
+            "name": f"{b.scheme_name}",
+            "allocatedBudget": float(b.allocated_amount),
+            "spentBudget": float(b.utilized_amount),
+            "status": status
+        })
+        
+    if not schemes_list:
+        schemes_list = [
+            {"id": 1, "name": "Mission Bhagiratha (Drinking Water)", "allocatedBudget": 1500000, "spentBudget": 1450000, "status": "Completed"},
+            {"id": 2, "name": "Rythu Bandhu (Farmer Support)", "allocatedBudget": 2800000, "spentBudget": 2800000, "status": "Completed"},
+            {"id": 3, "name": "Mana Ooru - Mana Badi (School Dev)", "allocatedBudget": 1200000, "spentBudget": 850000, "status": "In Progress"},
+            {"id": 4, "name": "Basti Dawakhana Clinic Upgrades", "allocatedBudget": 800000, "spentBudget": 300000, "status": "In Progress"}
+        ]
+        
+    # 5. budgets (Grouped dynamic aggregations)
+    from collections import defaultdict
+    by_year = defaultdict(lambda: {"totalAllocation": 0.0, "totalSpent": 0.0, "infrastructureAlloc": 0.0, "welfareAlloc": 0.0})
+    for b in db_budgets:
+        y = b.financial_year
+        by_year[y]["totalAllocation"] += b.allocated_amount
+        by_year[y]["totalSpent"] += b.utilized_amount
+        if b.domain.lower() in ("water", "education", "health"):
+            by_year[y]["infrastructureAlloc"] += b.allocated_amount
+        else:
+            by_year[y]["welfareAlloc"] += b.allocated_amount
+            
+    budgets_list = []
+    for y, vals in by_year.items():
+        budgets_list.append({
+            "year": y,
+            "totalAllocation": int(vals["totalAllocation"]),
+            "totalSpent": int(vals["totalSpent"]),
+            "infrastructureAlloc": int(vals["infrastructureAlloc"]),
+            "welfareAlloc": int(vals["welfareAlloc"])
+        })
+        
+    if not budgets_list:
+        budgets_list = [{
+            "year": "2026-2027",
+            "totalAllocation": 6300000,
+            "totalSpent": 5400000,
+            "infrastructureAlloc": 3500000,
+            "welfareAlloc": 2800000
+        }]
+        
+    # 6. grievances (Safe dynamic mapping avoiding missing columns)
     grievance_records = db.query(Grievance).filter(Grievance.village_id == village.id).all()
     grievances_list = []
     for g in grievance_records:
+        title = g.description[:40] + "..." if g.description and len(g.description) > 40 else (g.description or f"{g.category.capitalize()} Grievance")
+        status = "Resolved" if g.status.lower() == "resolved" else "Pending"
         grievances_list.append({
             "id": g.id,
-            "title": g.title,
+            "title": title,
             "category": g.category or "Water",
-            "status": "Resolved" if g.resolved_at else "Pending",
+            "status": status,
             "createdAt": g.created_at.isoformat() if g.created_at else "2026-08-13T00:00:00",
             "description": g.description
         })
+        
     if not grievances_list:
         grievances_list = [
             {

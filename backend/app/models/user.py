@@ -10,6 +10,7 @@ class RoleEnum(str, enum.Enum):
     panchayat = "panchayat"    # manages a single village
     tahsildar = "tahsildar"    # monitors a mandal (all villages within it)
     collector = "collector"    # monitors a district (all mandals within it)
+    state = "state"            # monitors the entire state (highest administrative dashboard)
 
 
 class User(Base):

@@ -4,24 +4,22 @@ export default {
   theme: {
     extend: {
       colors: {
-        // GRAM palette: deep field-green ink, muted parchment surface,
-        // marigold accent (harvest/seal), and a distinct risk scale
-        // (kept separate from brand color so it always reads as data,
-        // not decoration).
-        ink: '#16241D',        // near-black deep forest — primary text/headers
-        field: '#24382C',      // secondary dark green — panels, nav
-        parchment: '#F2F0E6',  // warm neutral paper background
-        marigold: '#C98A2E',   // brand accent — harvest gold
-        marigolddark: '#9C6A1E',
+        ink: '#17352A',        // Deep Forest green ink
+        field: '#E8EEE6',      // soft sage surface
+        parchment: '#F5F1E7',  // warm ivory neutral background
+        marigold: '#B87932',   // Terracotta gold accent
+        marigolddark: '#965C20',
         risk: {
-          low: '#3E7A4C',
-          medium: '#C98A2E',
+          low: '#2D6A4F',
+          medium: '#B87932',
           high: '#C24A2E',
           critical: '#7A2020',
         },
       },
       fontFamily: {
+        heading: ['"Fraunces"', 'serif'],
         display: ['"Fraunces"', 'serif'],
+        sans: ['"Inter"', 'sans-serif'],
         body: ['"Inter"', 'sans-serif'],
         mono: ['"IBM Plex Mono"', 'monospace'],
       },

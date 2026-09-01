@@ -7,37 +7,37 @@
   --font-heading: 'Fraunces', serif;
   --font-mono: 'IBM Plex Mono', monospace;
   
-  /* Color Palette */
-  --bg-base: #16241D;
-  --bg-surface: rgba(36, 56, 44, 0.7);
-  --bg-surface-solid: #24382C;
-  --bg-card: rgba(36, 56, 44, 0.6);
-  --bg-input: rgba(22, 36, 29, 0.8);
+  /* Color Palette - Unified Deccan Ivory */
+  --bg-base: #F5F1E7;
+  --bg-surface: rgba(255, 255, 255, 0.9);
+  --bg-surface-solid: #FFFFFF;
+  --bg-card: #FFFFFF;
+  --bg-input: #FFFFFF;
   
-  --border-light: rgba(242, 240, 230, 0.12);
-  --border-focus: #C98A2E;
+  --border-light: rgba(23, 53, 42, 0.1);
+  --border-focus: #B87932;
   
-  --primary: #C98A2E;
-  --primary-glow: rgba(201, 138, 46, 0.35);
-  --secondary: #F2F0E6;
-  --secondary-glow: rgba(242, 240, 230, 0.25);
-  --accent: #C98A2E;
-  --success: #66bb6a;
-  --warning: #ffa726;
-  --danger: #ef5350;
+  --primary: #B87932;
+  --primary-glow: rgba(184, 121, 50, 0.12);
+  --secondary: #17352A;
+  --secondary-glow: rgba(23, 53, 42, 0.05);
+  --accent: #B87932;
+  --success: #2D6A4F;
+  --warning: #B87932;
+  --danger: #C24A2E;
   
   /* Categories Colors */
-  --cat-newsletter: #00e5ff;
+  --cat-newsletter: #B87932;
   --cat-recruitment: #7c4dff;
-  --cat-finance: #00e676;
-  --cat-notification: #ffea00;
+  --cat-finance: #2D6A4F;
+  --cat-notification: #B87932;
   --cat-personal: #ff4081;
-  --cat-work: #ff9100;
+  --cat-work: #B87932;
   
   /* Text Colors */
-  --text-primary: #F2F0E6;
-  --text-secondary: rgba(242, 240, 230, 0.7);
-  --text-muted: rgba(242, 240, 230, 0.45);
+  --text-primary: #17352A;
+  --text-secondary: #5F7668;
+  --text-muted: rgba(23, 53, 42, 0.45);
 }
 
 * {
@@ -51,9 +51,8 @@ body {
   font-family: var(--font-sans);
   background-color: var(--bg-base);
   color: var(--text-primary);
-  overflow: hidden;
-  height: 100vh;
-  width: 100vw;
+  min-height: 100vh;
+  width: 100%;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -1458,25 +1457,25 @@ body {
 
 /* Dynamic Map SVG styling */
 .tg-map-district {
-  fill: #ffffff;
-  stroke: #d8d6cc;
-  stroke-width: 1px;
+  fill: #F4EFE3;
+  stroke: #B9B8A8;
+  stroke-width: 0.85px;
   transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
 }
 
 .tg-map-district:hover {
-  fill: #C98A2E !important;
-  stroke: #ffffff !important;
-  stroke-width: 1.5px !important;
-  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.25));
+  fill: #B8894A !important;
+  stroke: #F7F3E8 !important;
+  stroke-width: 1.2px !important;
+  filter: drop-shadow(0 4px 10px rgba(38, 52, 44, 0.12));
 }
 
 .tg-map-district.active {
-  fill: #C98A2E !important;
-  stroke: #ffffff !important;
-  stroke-width: 2px !important;
-  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.4));
+  fill: #9A6A2C !important;
+  stroke: #F7F3E8 !important;
+  stroke-width: 1.5px !important;
+  filter: drop-shadow(0 6px 14px rgba(38, 52, 44, 0.22));
 }
 
 /* Styled overlay maps */

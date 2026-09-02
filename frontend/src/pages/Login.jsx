@@ -30,9 +30,11 @@ export default function Login({ onLoginSuccess }) {
     try {
       if (isLogin) {
         // Sign In Flow
-        const response = await api.post('/auth/login', {
-          email: data.email,
-          password: data.password
+        const params = new URLSearchParams();
+        params.append('username', data.email);
+        params.append('password', data.password);
+        const response = await api.post('/auth/login', params, {
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
         });
         
         const { token, user } = response.data;
@@ -74,20 +76,20 @@ export default function Login({ onLoginSuccess }) {
   };
 
   return (
-    <div className="auth-page bg-[#16241D]">
-      <div className="auth-card glass max-w-md w-full mx-4 shadow-2xl relative overflow-hidden border border-[#F2F0E6]/10 p-8 rounded-3xl">
+    <div className="auth-page bg-[#F5F1E7]">
+      <div className="auth-card glass max-w-md w-full mx-4 shadow-2xl relative overflow-hidden border border-[#17352A]/10 p-8 rounded-3xl">
         {/* Glow Effects */}
-        <div className="absolute -top-24 -left-24 w-48 h-48 rounded-full bg-[#C98A2E]/10 blur-3xl"></div>
-        <div className="absolute -bottom-24 -right-24 w-48 h-48 rounded-full bg-[#C98A2E]/5 blur-3xl"></div>
+        <div className="absolute -top-24 -left-24 w-48 h-48 rounded-full bg-[#B87932]/10 blur-3xl"></div>
+        <div className="absolute -bottom-24 -right-24 w-48 h-48 rounded-full bg-[#B87932]/5 blur-3xl"></div>
 
-        <div className="auth-logo mx-auto bg-[#C98A2E] text-[#16241D] w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg">
+        <div className="auth-logo mx-auto bg-[#B87932] text-white w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg">
           <Compass size={24} />
         </div>
 
-        <h2 className="auth-title font-heading text-2xl font-black text-center text-white mt-4 tracking-tight">
+        <h2 className="auth-title font-heading text-2xl font-black text-center text-[#17352A] mt-4 tracking-tight">
           {isLogin ? 'Officer Portal' : 'Register Officer Profile'}
         </h2>
-        <p className="auth-subtitle mt-2 text-xs text-[#F2F0E6]/60 text-center leading-relaxed">
+        <p className="auth-subtitle mt-2 text-xs text-[#17352A]/60 text-center leading-relaxed">
           {isLogin 
             ? 'Access the village audit system, manage development indexes, and review citizen grievances.' 
             : 'Register a new administrative officer profile in the Telangana LGD Directory.'}
@@ -99,13 +101,13 @@ export default function Login({ onLoginSuccess }) {
           {!isLogin && (
             <div className="grid grid-cols-2 gap-4">
               <div className="form-group flex flex-col gap-1.5">
-                <label className="text-[10px] font-mono font-bold text-[#F2F0E6]/50 uppercase">
+                <label className="text-[10px] font-mono font-bold text-[#17352A]/50 uppercase">
                   Officer Role
                 </label>
-                <div className="relative flex items-center bg-[#24382C]/50 border border-[#F2F0E6]/10 focus-within:border-[#C98A2E] rounded-xl px-4 py-2.5">
-                  <User className="text-[#C98A2E] mr-3" size={16} />
+                <div className="relative flex items-center bg-[#F5F1E7] border border-[#17352A]/10 focus-within:border-[#B87932] rounded-xl px-4 py-2.5">
+                  <User className="text-[#B87932] mr-3" size={16} />
                   <select
-                    className="w-full bg-transparent text-xs text-white outline-none font-heading"
+                    className="w-full bg-transparent text-xs text-[#17352A] outline-none font-heading"
                     {...register('role', { required: !isLogin })}
                   >
                     <option value="Panchayat">Panchayat Secretary</option>
@@ -115,22 +117,22 @@ export default function Login({ onLoginSuccess }) {
               </div>
 
               <div className="form-group flex flex-col gap-1.5">
-                <label className="text-[10px] font-mono font-bold text-[#F2F0E6]/50 uppercase">
+                <label className="text-[10px] font-mono font-bold text-[#17352A]/50 uppercase">
                   Village LGD Code
                 </label>
-                <div className="relative flex items-center bg-[#24382C]/50 border border-[#F2F0E6]/10 focus-within:border-[#C98A2E] rounded-xl px-4 py-2.5">
-                  <Shield className="text-[#C98A2E] mr-3" size={16} />
+                <div className="relative flex items-center bg-[#F5F1E7] border border-[#17352A]/10 focus-within:border-[#B87932] rounded-xl px-4 py-2.5">
+                  <Shield className="text-[#B87932] mr-3" size={16} />
                   <input
                     type="number"
                     placeholder="e.g. 569005"
-                    className="w-full bg-transparent text-xs text-white outline-none font-mono"
+                    className="w-full bg-transparent text-xs text-[#17352A] outline-none font-mono"
                     {...register('lgdCode', { 
                       required: !isLogin ? 'LGD Code is required' : false 
                     })}
                   />
                 </div>
                 {errors.lgdCode && (
-                  <span className="text-[10px] text-red-400 font-medium block mt-1">
+                  <span className="text-[10px] text-red-700 font-medium block mt-1">
                     {errors.lgdCode.message}
                   </span>
                 )}
@@ -140,15 +142,15 @@ export default function Login({ onLoginSuccess }) {
 
           {/* Email Field */}
           <div className="form-group flex flex-col gap-1.5">
-            <label className="text-[10px] font-mono font-bold text-[#F2F0E6]/50 uppercase">
+            <label className="text-[10px] font-mono font-bold text-[#17352A]/50 uppercase">
               Email Address
             </label>
-            <div className="relative flex items-center bg-[#24382C]/50 border border-[#F2F0E6]/10 focus-within:border-[#C98A2E] rounded-xl px-4 py-2.5">
-              <Mail className="text-[#C98A2E] mr-3" size={16} />
+            <div className="relative flex items-center bg-[#F5F1E7] border border-[#17352A]/10 focus-within:border-[#B87932] rounded-xl px-4 py-2.5">
+              <Mail className="text-[#B87932] mr-3" size={16} />
               <input
                 type="email"
                 placeholder="officer@telangana.gov.in"
-                className="w-full bg-transparent text-xs text-white outline-none font-heading"
+                className="w-full bg-transparent text-xs text-[#17352A] outline-none font-heading"
                 {...register('email', { 
                   required: 'Email address is required',
                   pattern: {
@@ -159,7 +161,7 @@ export default function Login({ onLoginSuccess }) {
               />
             </div>
             {errors.email && (
-              <span className="text-[10px] text-red-400 font-medium block mt-1">
+              <span className="text-[10px] text-red-700 font-medium block mt-1">
                 {errors.email.message}
               </span>
             )}
@@ -167,15 +169,15 @@ export default function Login({ onLoginSuccess }) {
 
           {/* Password Field */}
           <div className="form-group flex flex-col gap-1.5">
-            <label className="text-[10px] font-mono font-bold text-[#F2F0E6]/50 uppercase">
+            <label className="text-[10px] font-mono font-bold text-[#17352A]/50 uppercase">
               Password
             </label>
-            <div className="relative flex items-center bg-[#24382C]/50 border border-[#F2F0E6]/10 focus-within:border-[#C98A2E] rounded-xl px-4 py-2.5">
-              <Lock className="text-[#C98A2E] mr-3" size={16} />
+            <div className="relative flex items-center bg-[#F5F1E7] border border-[#17352A]/10 focus-within:border-[#B87932] rounded-xl px-4 py-2.5">
+              <Lock className="text-[#B87932] mr-3" size={16} />
               <input
                 type="password"
                 placeholder="••••••••"
-                className="w-full bg-transparent text-xs text-white outline-none font-mono"
+                className="w-full bg-transparent text-xs text-[#17352A] outline-none font-mono"
                 {...register('password', { 
                   required: 'Password is required',
                   minLength: {
@@ -186,7 +188,7 @@ export default function Login({ onLoginSuccess }) {
               />
             </div>
             {errors.password && (
-              <span className="text-[10px] text-red-400 font-medium block mt-1">
+              <span className="text-[10px] text-red-700 font-medium block mt-1">
                 {errors.password.message}
               </span>
             )}
@@ -196,10 +198,10 @@ export default function Login({ onLoginSuccess }) {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-[#C98A2E] hover:bg-[#b07824] disabled:opacity-60 text-[#16241D] font-mono font-bold rounded-xl py-3 px-4 text-xs block transition-all flex items-center justify-center gap-2 mt-2"
+            className="w-full bg-[#B87932] hover:bg-[#B87932] disabled:opacity-60 text-[#17352A] font-mono font-bold rounded-xl py-3 px-4 text-xs block transition-all flex items-center justify-center gap-2 mt-2"
           >
             {loading ? (
-              <Loader2 className="animate-spin text-[#16241D]" size={18} />
+              <Loader2 className="animate-spin text-[#17352A]" size={18} />
             ) : (
               <>
                 <span>{isLogin ? 'Secure Sign In' : 'Register Officer Profile'}</span>
@@ -210,11 +212,11 @@ export default function Login({ onLoginSuccess }) {
         </form>
 
         {/* Toggle Mode footer */}
-        <div className="mt-8 text-center text-xs text-[#F2F0E6]/50">
+        <div className="mt-8 text-center text-xs text-[#17352A]/50">
           <span>{isLogin ? "Need a new officer register? " : 'Already registered? '}</span>
           <button
             onClick={toggleMode}
-            className="text-[#C98A2E] hover:underline font-bold cursor-pointer transition-colors"
+            className="text-[#B87932] hover:underline font-bold cursor-pointer transition-colors"
           >
             {isLogin ? 'Create profile here' : 'Sign in here'}
           </button>

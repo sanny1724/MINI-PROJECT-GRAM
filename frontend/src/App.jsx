@@ -1,3 +1,4 @@
+import TelanganaAppLoader from './components/TelanganaAppLoader';
 // src/App.jsx
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
@@ -48,14 +49,8 @@ export default function App() {
     setUser(updatedUserData);
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-screen w-screen bg-[#08090c]">
-        <div className="animate-pulse text-slate-400 font-semibold tracking-wider text-sm">
-          Loading StockFlow...
-        </div>
-      </div>
-    );
+    if (loading) {
+    return <TelanganaAppLoader message="Connecting Statewide Governance Network..." />;
   }
 
   // Component to protect router paths
@@ -89,6 +84,38 @@ export default function App() {
           {/* Protected App Paths */}
           <Route 
             path="/dashboard" 
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/officer/village/:villageId" 
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/officer/mandal/:mandalId" 
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/officer/district/:districtId" 
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/officer/state" 
             element={
               <ProtectedRoute>
                 <Dashboard />

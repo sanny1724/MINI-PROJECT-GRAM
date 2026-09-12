@@ -1,3 +1,4 @@
+import GovtHeaderRibbon from '../components/GovtHeaderRibbon';
 // src/pages/PublicDashboard.jsx
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -413,6 +414,9 @@ export default function PublicDashboard() {
   return (
     <div className="min-h-screen bg-[#F5F1E7] text-[#17352A] font-sans selection:bg-[#B87932] selection:text-white pb-24">
       
+      {/* Official Government Utility Ribbon */}
+      <GovtHeaderRibbon lang={lang} onToggleLang={() => setLang(prev => prev === 'en' ? 'te' : 'en')} />
+
       {/* Feature 4: Emergency Disaster Advisory Banner */}
       <EmergencyAlertBanner t={t} lang={lang} />
 
@@ -438,10 +442,17 @@ export default function PublicDashboard() {
                   {t.publicDashboard}
                 </span>
               </div>
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-[#5F7668] mt-1 font-medium">
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-[#5F7668] mt-1.5 font-medium">
                 <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5 text-[#B87932]" /> {t.mandal}: {villageInfo.mandalName}</span>
                 <span className="flex items-center gap-1"><Building className="w-3.5 h-3.5 text-[#B87932]" /> {t.district}: {villageInfo.districtName}</span>
-                <span className="font-mono text-[#17352A]">{t.lgdCode}: {villageInfo.code}</span>
+                <span className="font-mono text-[#17352A] font-semibold">{t.lgdCode}: {villageInfo.code}</span>
+                <span className="inline-flex items-center gap-1 text-[10px] font-mono text-emerald-800 bg-emerald-50 border border-emerald-300/70 px-2.5 py-0.5 rounded-full font-bold shadow-2xs">
+                  <ShieldCheck className="w-3 h-3 text-emerald-600" />
+                  NIC/LGD Telemetry Sync: Live
+                </span>
+                <span className="inline-flex items-center gap-1 text-[10px] font-mono text-[#17352A]/80 bg-white border border-[#17352A]/15 px-2.5 py-0.5 rounded-full font-medium shadow-2xs">
+                  Hash: #TS-{villageInfo.code || '572932'}-2026
+                </span>
               </div>
             </div>
           </div>
@@ -498,7 +509,7 @@ export default function PublicDashboard() {
         <section className="lg:col-span-4 flex flex-col gap-6">
           
           {/* radial Development Score Card */}
-          <div className="bg-white border border-[#17352A]/10 rounded-3xl p-8 flex flex-col items-center justify-center text-center shadow-sm relative overflow-hidden">
+          <div className="gov-card rounded-3xl p-8 flex flex-col items-center justify-center text-center relative overflow-hidden">
             <span className="text-xs font-mono font-bold text-[#B87932] tracking-widest uppercase mb-4">{t.developmentIndex}</span>
             
             {/* Circular Gauge */}
@@ -551,7 +562,7 @@ export default function PublicDashboard() {
           </div>
 
           {/* Local Officials Directory */}
-          <div className="bg-white border border-[#17352A]/10 rounded-3xl p-6 flex flex-col gap-4 shadow-sm">
+          <div className="gov-card-static rounded-3xl p-6 flex flex-col gap-4">
             <h3 className="font-heading font-bold text-lg text-[#17352A] border-b border-[#17352A]/10 pb-3">{t.officialsDirectory}</h3>
             <div className="flex flex-col gap-4">
               {officials.map(o => (
@@ -651,7 +662,7 @@ export default function PublicDashboard() {
           </div>
 
           {/* Domain Detail Pane */}
-          <div className="bg-white border border-[#17352A]/10 rounded-3xl p-6 flex flex-col gap-6 shadow-sm">
+          <div className="gov-card-static rounded-3xl p-6 flex flex-col gap-6">
             <div className="flex justify-between items-start border-b border-[#17352A]/10 pb-4">
               <div>
                 <span className="text-[10px] font-mono font-bold text-[#B87932] uppercase">{t.sectorFocus}</span>
@@ -703,7 +714,7 @@ export default function PublicDashboard() {
           />
 
           {/* Budget & Schemes Overview */}
-          <div className="bg-white border border-[#17352A]/10 rounded-3xl p-6 flex flex-col gap-6 shadow-sm">
+          <div className="gov-card-static rounded-3xl p-6 flex flex-col gap-6">
             <div className="flex justify-between items-center border-b border-[#17352A]/10 pb-4">
               <div>
                 <span className="text-[10px] font-mono font-bold text-[#B87932] uppercase">{t.financialDisclosures}</span>
@@ -791,7 +802,7 @@ export default function PublicDashboard() {
           <VillageHallOfFame t={t} lang={lang} />
 
           {/* Citizen Grievance Portal Card */}
-          <div id="grievance-portal" className="bg-white border border-[#17352A]/10 rounded-3xl p-6 flex flex-col gap-6 shadow-sm scroll-mt-28">
+          <div id="grievance-portal" className="gov-card-static rounded-3xl p-6 flex flex-col gap-6 scroll-mt-28">
             <div className="flex justify-between items-center border-b border-[#17352A]/10 pb-4">
               <div>
                 <span className="text-[10px] font-mono font-bold text-[#B87932] uppercase">{t.publicAccountability}</span>

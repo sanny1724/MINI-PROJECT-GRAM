@@ -1,3 +1,4 @@
+import GovtHeaderRibbon from '../components/GovtHeaderRibbon';
 import GovernancePipeline3D from '../components/GovernancePipeline3D';
 // src/pages/LandingPage.jsx
 import React, { useState, useEffect, useRef } from 'react';
@@ -452,9 +453,12 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-[#F5F1E7] text-[#17352A] font-sans selection:bg-[#B87932] selection:text-white overflow-x-hidden">
       
+      {/* Official Government Utility Ribbon */}
+      <GovtHeaderRibbon />
+
       {/* SECTION 1 — NAVIGATION BAR */}
-      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled ? 'bg-[#17352A]/90 backdrop-blur-md border-b border-[#F5F1E7]/10 shadow-lg py-4' : 'bg-transparent py-6'
+      <nav className={`sticky top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        isScrolled ? 'bg-[#17352A]/95 backdrop-blur-md border-b border-[#F5F1E7]/10 shadow-lg py-3.5' : 'bg-[#17352A]/85 backdrop-blur-md py-4 border-b border-white/10 shadow-sm'
       }`}>
         <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
           {/* Official Government of Telangana Emblem & Logo */}
@@ -673,7 +677,7 @@ export default function LandingPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
           {/* Water Domain */}
-          <div className="bg-white border border-[#17352A]/10 p-6 rounded-2xl flex flex-col gap-4 shadow-sm hover:border-[#B87932]/30 transition-all hover:-translate-y-0.5 duration-300">
+          <div className="gov-card p-6 rounded-3xl flex flex-col gap-4 hover:border-[#B87932]/40">
             <div className="w-12 h-12 rounded-xl bg-[#287C78]/10 border border-[#287C78]/25 flex items-center justify-center text-[#287C78]">
               <Droplet className="w-6 h-6" />
             </div>
@@ -687,7 +691,7 @@ export default function LandingPage() {
           </div>
 
           {/* Education Domain */}
-          <div className="bg-white border border-[#17352A]/10 p-6 rounded-2xl flex flex-col gap-4 shadow-sm hover:border-[#B87932]/30 transition-all hover:-translate-y-0.5 duration-300">
+          <div className="gov-card p-6 rounded-3xl flex flex-col gap-4 hover:border-[#B87932]/40">
             <div className="w-12 h-12 rounded-xl bg-[#5B64B6]/10 border border-[#5B64B6]/25 flex items-center justify-center text-[#5B64B6]">
               <GraduationCap className="w-6 h-6" />
             </div>
@@ -701,7 +705,7 @@ export default function LandingPage() {
           </div>
 
           {/* Health Domain */}
-          <div className="bg-white border border-[#17352A]/10 p-6 rounded-2xl flex flex-col gap-4 shadow-sm hover:border-[#B87932]/30 transition-all hover:-translate-y-0.5 duration-300">
+          <div className="gov-card p-6 rounded-3xl flex flex-col gap-4 hover:border-[#B87932]/40">
             <div className="w-12 h-12 rounded-xl bg-[#B44A4A]/10 border border-[#B44A4A]/25 flex items-center justify-center text-[#B44A4A]">
               <Activity className="w-6 h-6" />
             </div>
@@ -715,7 +719,7 @@ export default function LandingPage() {
           </div>
 
           {/* Agriculture Domain */}
-          <div className="bg-white border border-[#17352A]/10 p-6 rounded-2xl flex flex-col gap-4 shadow-sm hover:border-[#B87932]/30 transition-all hover:-translate-y-0.5 duration-300">
+          <div className="gov-card p-6 rounded-3xl flex flex-col gap-4 hover:border-[#B87932]/40">
             <div className="w-12 h-12 rounded-xl bg-[#3F7A50]/10 border border-[#3F7A50]/25 flex items-center justify-center text-[#3F7A50]">
               <Sprout className="w-6 h-6" />
             </div>
@@ -729,7 +733,7 @@ export default function LandingPage() {
           </div>
 
           {/* Governance Domain */}
-          <div className="bg-white border border-[#17352A]/10 p-6 rounded-2xl flex flex-col gap-4 shadow-sm hover:border-[#B87932]/30 transition-all hover:-translate-y-0.5 duration-300">
+          <div className="gov-card p-6 rounded-3xl flex flex-col gap-4 hover:border-[#B87932]/40">
             <div className="w-12 h-12 rounded-xl bg-[#A87925]/10 border border-[#A87925]/25 flex items-center justify-center text-[#A87925]">
               <ShieldAlert className="w-6 h-6" />
             </div>

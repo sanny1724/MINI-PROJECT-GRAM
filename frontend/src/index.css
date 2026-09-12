@@ -65,6 +65,45 @@ body {
   box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
 }
 
+/* Sub-Pixel Executive GovTech Cards (Apple & Linear Quality UI) */
+.gov-card {
+  background: #FFFFFF;
+  border: 1px solid rgba(23, 53, 42, 0.08);
+  box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.95), 0 4px 20px -4px rgba(23, 53, 42, 0.05);
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.gov-card:hover {
+  border-color: rgba(184, 121, 50, 0.28);
+  box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 1), 0 20px 40px -12px rgba(23, 53, 42, 0.12);
+  transform: translateY(-2px);
+}
+
+.gov-card-static {
+  background: #FFFFFF;
+  border: 1px solid rgba(23, 53, 42, 0.08);
+  box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.95), 0 4px 20px -4px rgba(23, 53, 42, 0.05);
+}
+
+/* High-Contrast / Direct Sunlight Accessibility Mode */
+body.high-contrast {
+  background-color: #EDE8DD !important;
+  color: #000000 !important;
+  filter: contrast(1.12) brightness(0.98);
+}
+body.high-contrast .gov-card,
+body.high-contrast .bg-white {
+  background-color: #FFFFFF !important;
+  border-color: #000000 !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+}
+body.high-contrast h1, 
+body.high-contrast h2, 
+body.high-contrast h3, 
+body.high-contrast h4 {
+  color: #000000 !important;
+}
+
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;

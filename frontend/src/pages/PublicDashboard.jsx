@@ -1,4 +1,3 @@
-import GovtHeaderRibbon from '../components/GovtHeaderRibbon';
 // src/pages/PublicDashboard.jsx
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -414,9 +413,6 @@ export default function PublicDashboard() {
   return (
     <div className="min-h-screen bg-[#F5F1E7] text-[#17352A] font-sans selection:bg-[#B87932] selection:text-white pb-24">
       
-      {/* Official Government Utility Ribbon */}
-      <GovtHeaderRibbon lang={lang} onToggleLang={() => setLang(prev => prev === 'en' ? 'te' : 'en')} />
-
       {/* Feature 4: Emergency Disaster Advisory Banner */}
       <EmergencyAlertBanner t={t} lang={lang} />
 
@@ -442,17 +438,10 @@ export default function PublicDashboard() {
                   {t.publicDashboard}
                 </span>
               </div>
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-[#5F7668] mt-1.5 font-medium">
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-[#5F7668] mt-1 font-medium">
                 <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5 text-[#B87932]" /> {t.mandal}: {villageInfo.mandalName}</span>
                 <span className="flex items-center gap-1"><Building className="w-3.5 h-3.5 text-[#B87932]" /> {t.district}: {villageInfo.districtName}</span>
-                <span className="font-mono text-[#17352A] font-semibold">{t.lgdCode}: {villageInfo.code}</span>
-                <span className="inline-flex items-center gap-1 text-[10px] font-mono text-emerald-800 bg-emerald-50 border border-emerald-300/70 px-2.5 py-0.5 rounded-full font-bold shadow-2xs">
-                  <ShieldCheck className="w-3 h-3 text-emerald-600" />
-                  NIC/LGD Telemetry Sync: Live
-                </span>
-                <span className="inline-flex items-center gap-1 text-[10px] font-mono text-[#17352A]/80 bg-white border border-[#17352A]/15 px-2.5 py-0.5 rounded-full font-medium shadow-2xs">
-                  Hash: #TS-{villageInfo.code || '572932'}-2026
-                </span>
+                <span className="font-mono text-[#17352A]">{t.lgdCode}: {villageInfo.code}</span>
               </div>
             </div>
           </div>

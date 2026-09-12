@@ -1,4 +1,3 @@
-import GovtHeaderRibbon from '../components/GovtHeaderRibbon';
 import GovernancePipeline3D from '../components/GovernancePipeline3D';
 // src/pages/LandingPage.jsx
 import React, { useState, useEffect, useRef } from 'react';
@@ -453,12 +452,9 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-[#F5F1E7] text-[#17352A] font-sans selection:bg-[#B87932] selection:text-white overflow-x-hidden">
       
-      {/* Official Government Utility Ribbon */}
-      <GovtHeaderRibbon />
-
       {/* SECTION 1 — NAVIGATION BAR */}
-      <nav className={`sticky top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled ? 'bg-[#17352A]/95 backdrop-blur-md border-b border-[#F5F1E7]/10 shadow-lg py-3.5' : 'bg-[#17352A]/85 backdrop-blur-md py-4 border-b border-white/10 shadow-sm'
+      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        isScrolled ? 'bg-[#17352A]/90 backdrop-blur-md border-b border-[#F5F1E7]/10 shadow-lg py-4' : 'bg-transparent py-6'
       }`}>
         <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
           {/* Official Government of Telangana Emblem & Logo */}

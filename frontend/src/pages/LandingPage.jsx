@@ -567,9 +567,11 @@ export default function LandingPage() {
           <img 
             src={heroBg} 
             alt="Telangana Heritage & Governance Background" 
-            className="w-full h-full object-cover object-center scale-105 filter brightness-[0.75] contrast-[1.1]"
+            className="w-full h-full object-cover object-center scale-105 filter brightness-[1.12] contrast-[1.08] saturate-[1.15]"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-[#17352A]/85 via-[#17352A]/50 to-[#17352A]/95" />
+          {/* Light modern overlay: maintains scenic brightness & vibrant greenery while preserving text contrast */}
+          <div className="absolute inset-0 bg-gradient-to-r from-[#17352A]/65 via-[#17352A]/20 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#17352A]/75 via-transparent to-[#17352A]/35" />
         </div>
 
         {/* Traditional Telangana Line/Architectural motifs */}

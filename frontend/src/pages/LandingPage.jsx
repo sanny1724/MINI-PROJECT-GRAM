@@ -17,6 +17,7 @@ import {
 import api from '../api';
 import { telanganaMapData } from '../assets/telangana-districts';
 import { getDistrictCollector } from '../data/districtCollectors';
+import heroBg from '../assets/hero.png';
 
 // Helper for seeded random coordinates
 function getSeededRandom(seed) {
@@ -530,20 +531,14 @@ export default function LandingPage() {
 
       {/* SECTION 2 — HERO SECTION WITH BACKGROUND VIDEO & INTERACTIVE SELECTOR */}
       <section id="home" className="relative min-h-screen pt-28 pb-12 px-6 flex items-center justify-center overflow-hidden">
-        {/* Background Cinematic Video */}
-        <div className="absolute inset-0 w-full h-full overflow-hidden z-0">
-          <video 
-            autoPlay 
-            loop 
-            muted 
-            playsInline 
-            className="w-full object-cover" 
-            style={{ height: 'calc(100% + 75px)', objectPosition: 'center top' }}
-            poster="src/assets/hero.png"
-          >
-            <source src="/videos/telangana-heritage.mp4" type="video/mp4" />
-          </video>
-          <div className="absolute inset-0 bg-gradient-to-b from-[#17352A]/70 via-[#17352A]/40 to-transparent" />
+        {/* Background Cinematic Image & Ambience */}
+        <div className="absolute inset-0 w-full h-full overflow-hidden z-0 pointer-events-none">
+          <img 
+            src={heroBg} 
+            alt="Telangana Heritage & Governance Background" 
+            className="w-full h-full object-cover object-center scale-105 filter brightness-[0.75] contrast-[1.1]"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#17352A]/85 via-[#17352A]/50 to-[#17352A]/95" />
         </div>
 
         {/* Traditional Telangana Line/Architectural motifs */}

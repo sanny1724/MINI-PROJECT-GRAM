@@ -10,6 +10,7 @@ import {
   Building,
   Award,
   X,
+  Menu,
   Search, MapPin, ArrowRight, Layers, 
   DollarSign, Activity, FileText, Droplet, GraduationCap, 
   Plus, CheckCircle2, Phone, LogIn, Compass, Check, Sprout
@@ -55,6 +56,7 @@ export default function LandingPage() {
   // Navigation states
   const [activeTab, setActiveTab] = useState('home');
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Map & LGD states
   const [viewMode, setViewMode] = useState('state'); // 'state' | 'district' | 'mandal'
@@ -487,25 +489,25 @@ export default function LandingPage() {
       
       {/* SECTION 1 — NAVIGATION BAR */}
       <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled ? 'bg-[#17352A]/90 backdrop-blur-md border-b border-[#F5F1E7]/10 shadow-lg py-4' : 'bg-transparent py-6'
+        isScrolled || isMobileMenuOpen ? 'bg-[#17352A]/95 backdrop-blur-md border-b border-[#F5F1E7]/10 shadow-lg py-3 sm:py-4' : 'bg-transparent py-4 sm:py-6'
       }`}>
-        <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between">
           {/* Official Government of Telangana Emblem & Logo */}
-          <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
-            <div className="w-11 h-11 bg-white rounded-2xl p-1 shadow-lg shadow-black/25 border border-white/20 flex items-center justify-center shrink-0 hover:scale-105 transition-transform">
+          <div className="flex items-center gap-2.5 sm:gap-3 cursor-pointer" onClick={() => navigate('/')}>
+            <div className="w-10 h-10 sm:w-11 sm:h-11 bg-white rounded-2xl p-1 shadow-lg shadow-black/25 border border-white/20 flex items-center justify-center shrink-0 hover:scale-105 transition-transform">
               <img src="/telangana-seal.png" alt="Government of Telangana Seal" className="w-full h-full object-contain" />
             </div>
             <div className="flex flex-col">
               <div className="flex items-center gap-1.5">
-                <span className="font-heading font-extrabold text-xl leading-none text-white tracking-tight">GRAM</span>
-                <span className="text-[9px] font-mono font-bold bg-[#B87932] text-white px-1.5 py-0.5 rounded-sm uppercase tracking-wider">Official</span>
+                <span className="font-heading font-extrabold text-lg sm:text-xl leading-none text-white tracking-tight">GRAM</span>
+                <span className="text-[8px] sm:text-[9px] font-mono font-bold bg-[#B87932] text-white px-1.5 py-0.5 rounded-sm uppercase tracking-wider">Official</span>
               </div>
-              <span className="text-[10px] text-[#B87932] font-mono tracking-wider uppercase font-semibold">Government of Telangana</span>
+              <span className="text-[9px] sm:text-[10px] text-[#B87932] font-mono tracking-wider uppercase font-semibold">Government of Telangana</span>
             </div>
           </div>
 
-          {/* Links */}
-          <div className="hidden md:flex items-center gap-6 text-sm font-medium">
+          {/* Desktop Links */}
+          <div className="hidden lg:flex items-center gap-6 text-sm font-medium">
             <a href="#home" onClick={() => setActiveTab('home')} className={`hover:text-[#B87932] transition-colors ${activeTab === 'home' ? 'text-[#B87932]' : 'text-white/70'}`}>Home</a>
             <a href="#explore" onClick={() => setActiveTab('explore')} className={`hover:text-[#B87932] transition-colors ${activeTab === 'explore' ? 'text-[#B87932]' : 'text-white/70'}`}>Explore Telangana</a>
             <button 
@@ -513,7 +515,7 @@ export default function LandingPage() {
                 toast.info("Welcome to the Citizen LGD Explorer. Please select a village.");
                 openGeneralWizard("Citizen LGD Explorer");
               }} 
-              className="hover:text-[#B87932] text-white/80 transition-colors font-medium"
+              className="hover:text-[#B87932] text-white/80 transition-colors font-medium cursor-pointer"
             >
               Citizen Portal
             </button>
@@ -522,7 +524,7 @@ export default function LandingPage() {
                 toast.info("Select a village to track active grievances.");
                 openGeneralWizard("Grievance Tracker Search");
               }} 
-              className="hover:text-[#B87932] text-white/80 transition-colors font-medium"
+              className="hover:text-[#B87932] text-white/80 transition-colors font-medium cursor-pointer"
             >
               Track Grievance
             </button>
@@ -531,37 +533,123 @@ export default function LandingPage() {
                 toast.info("Select a village to inspect budget disclosures.");
                 openGeneralWizard("Budget Disclosure Search");
               }} 
-              className="hover:text-[#B87932] text-white/80 transition-colors font-medium"
+              className="hover:text-[#B87932] text-white/80 transition-colors font-medium cursor-pointer"
             >
               Village Budgets
             </button>
           </div>
 
-          {/* Action Buttons */}
-          <div className="flex items-center gap-3">
+          {/* Action Buttons & Mobile Toggle */}
+          <div className="flex items-center gap-2 sm:gap-3">
             <button 
               onClick={() => {
                 toast.info("Select a village to file a new public grievance.");
                 openGeneralWizard("Report Grievance Portal");
               }}
-              className="bg-[#B87932] hover:bg-[#B87932]/90 text-white font-bold text-xs px-4 py-2.5 rounded-lg shadow-md hover:shadow-[#B87932]/25 transition-all flex items-center gap-1.5"
+              className="hidden sm:flex bg-[#B87932] hover:bg-[#B87932]/90 text-white font-bold text-xs px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg shadow-md hover:shadow-[#B87932]/25 transition-all items-center gap-1.5 cursor-pointer"
             >
               <FileText className="w-3.5 h-3.5" />
               <span>Report Issue</span>
             </button>
+            
             <button 
               onClick={() => navigate('/login')}
-              className="border border-white/25 hover:border-[#B87932] hover:bg-[#17352A]/40 text-white font-bold text-xs px-4 py-2.5 rounded-lg transition-all flex items-center gap-1.5"
+              className="hidden sm:flex border border-white/25 hover:border-[#B87932] hover:bg-[#17352A]/40 text-white font-bold text-xs px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg transition-all items-center gap-1.5 cursor-pointer"
             >
               <LogIn className="w-3.5 h-3.5" />
               <span>Officer Login</span>
             </button>
+
+            {/* Mobile Hamburger Toggle Button */}
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="lg:hidden w-10 h-10 rounded-xl bg-white/10 hover:bg-white/20 border border-white/15 text-white flex items-center justify-center transition-colors cursor-pointer"
+              aria-label="Toggle Navigation Menu"
+            >
+              {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
           </div>
         </div>
+
+        {/* Mobile Dropdown Navigation Menu */}
+        {isMobileMenuOpen && (
+          <div className="lg:hidden bg-[#17352A]/98 border-t border-white/10 px-6 py-5 flex flex-col gap-4 animate-fade-in shadow-2xl">
+            <a 
+              href="#home" 
+              onClick={() => {
+                setActiveTab('home');
+                setIsMobileMenuOpen(false);
+              }} 
+              className="text-white text-sm font-medium hover:text-[#B87932] py-1 border-b border-white/5"
+            >
+              Home
+            </a>
+            <a 
+              href="#explore" 
+              onClick={() => {
+                setActiveTab('explore');
+                setIsMobileMenuOpen(false);
+              }} 
+              className="text-white text-sm font-medium hover:text-[#B87932] py-1 border-b border-white/5"
+            >
+              Explore Telangana Map
+            </a>
+            <button 
+              onClick={() => {
+                setIsMobileMenuOpen(false);
+                openGeneralWizard("Citizen LGD Explorer");
+              }} 
+              className="text-left text-white text-sm font-medium hover:text-[#B87932] py-1 border-b border-white/5 cursor-pointer"
+            >
+              Citizen Portal
+            </button>
+            <button 
+              onClick={() => {
+                setIsMobileMenuOpen(false);
+                openGeneralWizard("Grievance Tracker Search");
+              }} 
+              className="text-left text-white text-sm font-medium hover:text-[#B87932] py-1 border-b border-white/5 cursor-pointer"
+            >
+              Track Grievance
+            </button>
+            <button 
+              onClick={() => {
+                setIsMobileMenuOpen(false);
+                openGeneralWizard("Budget Disclosure Search");
+              }} 
+              className="text-left text-white text-sm font-medium hover:text-[#B87932] py-1 border-b border-white/5 cursor-pointer"
+            >
+              Village Budgets
+            </button>
+            
+            <div className="pt-2 flex flex-col gap-2.5">
+              <button 
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  openGeneralWizard("Report Grievance Portal");
+                }}
+                className="w-full bg-[#B87932] hover:bg-[#B87932]/90 text-white font-bold text-xs py-3 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <FileText className="w-4 h-4" />
+                <span>Report Public Issue</span>
+              </button>
+              <button 
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  navigate('/login');
+                }}
+                className="w-full border border-white/20 hover:border-[#B87932] text-white font-bold text-xs py-3 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <LogIn className="w-4 h-4" />
+                <span>Officer Login</span>
+              </button>
+            </div>
+          </div>
+        )}
       </nav>
 
       {/* SECTION 2 — HERO SECTION WITH BACKGROUND VIDEO & INTERACTIVE SELECTOR */}
-      <section id="home" className="relative min-h-screen pt-28 pb-12 px-6 flex items-center justify-center overflow-hidden">
+      <section id="home" className="relative min-h-screen pt-24 sm:pt-28 pb-12 px-4 sm:px-6 flex items-center justify-center overflow-hidden">
         {/* Background Cinematic Image & Ambience */}
         <div className="absolute inset-0 w-full h-full overflow-hidden z-0 pointer-events-none">
           <img 
@@ -577,43 +665,53 @@ export default function LandingPage() {
         {/* Traditional Telangana Line/Architectural motifs */}
         <div className="absolute top-24 left-0 right-0 h-1 bg-[repeating-linear-gradient(90deg,#B87932,#B87932_10px,transparent_10px,transparent_20px)] opacity-20 z-10" />
 
-        <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-8 items-center z-10 pt-8">
+        <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-8 items-center z-10 pt-4 sm:pt-8">
           
           {/* Left Column - Hero Text (5 cols) */}
-          <div className="lg:col-span-5 flex flex-col gap-6 text-left">
-            <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-[#17352A]/85 border border-[#B87932]/35 text-[11px] font-mono font-bold tracking-wider text-white backdrop-blur-md w-max shadow-lg animate-fade-in">
-              <img src="/telangana-seal.png" alt="Government of Telangana Seal" className="w-6 h-6 object-contain rounded-full bg-white p-0.5" />
+          <div className="lg:col-span-5 flex flex-col gap-4 sm:gap-6 text-left">
+            <div className="inline-flex items-center gap-2 sm:gap-2.5 px-3 sm:px-4 py-1.5 rounded-full bg-[#17352A]/85 border border-[#B87932]/35 text-[10px] sm:text-[11px] font-mono font-bold tracking-wider text-white backdrop-blur-md w-max shadow-lg animate-fade-in">
+              <img src="/telangana-seal.png" alt="Government of Telangana Seal" className="w-5 h-5 sm:w-6 sm:h-6 object-contain rounded-full bg-white p-0.5" />
               <span className="text-[#B87932]">GOVERNMENT OF TELANGANA</span>
               <span className="text-white/40">•</span>
               <span className="text-xs text-white/95 font-sans font-medium">తెలంగాణ ప్రభుత్వం</span>
             </div>
             
-            <div className="flex flex-col gap-2">
-              <h1 className="font-heading font-black text-5xl md:text-7xl tracking-tight text-white leading-none">
+            <div className="flex flex-col gap-1.5 sm:gap-2">
+              <h1 className="font-heading font-black text-4xl sm:text-6xl md:text-7xl tracking-tight text-white leading-tight sm:leading-none">
                 GRAM
               </h1>
-              <h2 className="font-heading font-bold text-base md:text-xl text-[#B87932] tracking-wider uppercase">
+              <h2 className="font-heading font-bold text-sm sm:text-lg md:text-xl text-[#B87932] tracking-wider uppercase">
                 Governance Risk & Accountability Monitor
               </h2>
             </div>
 
-            <div className="flex flex-col gap-3">
-              <p className="font-heading text-lg md:text-2xl text-white font-normal italic leading-relaxed">
+            <div className="flex flex-col gap-2.5 sm:gap-3">
+              <p className="font-heading text-base sm:text-xl md:text-2xl text-white font-normal italic leading-snug sm:leading-relaxed">
                 "Transparency for Every Village.<br />Accountability for Every Citizen."
               </p>
-              <p className="text-xs md:text-sm text-white/80 leading-relaxed font-light max-w-md">
+              <p className="text-xs sm:text-sm text-white/80 leading-relaxed font-light max-w-md">
                 Connecting Telangana's villages, people and governance through transparent data and intelligent insights.
               </p>
             </div>
 
+            {/* Quick CTA on Mobile */}
+            <div className="flex items-center gap-3 pt-1 sm:hidden">
+              <button
+                onClick={() => openGeneralWizard("Explore Telangana Districts")}
+                className="flex-1 bg-[#B87932] hover:bg-[#B87932]/90 text-white font-bold text-xs py-2.5 px-4 rounded-xl shadow-md flex items-center justify-center gap-2"
+              >
+                <span>Browse 33 Districts</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
           </div>
 
           {/* Right Column - Map Only (7 cols) */}
-          <div className="lg:col-span-7 flex items-center justify-center min-h-[400px] md:min-h-[500px] pb-12">
+          <div className="lg:col-span-7 flex flex-col items-center justify-center min-h-[340px] sm:min-h-[420px] md:min-h-[500px] pb-6 sm:pb-12 relative">
             <svg
               ref={mapSvgRef}
               viewBox="0 0 930 880"
-              className="w-full h-full max-h-[500px] object-contain transition-all duration-700 ease-out"
+              className="w-full h-full max-h-[360px] sm:max-h-[440px] md:max-h-[500px] object-contain transition-all duration-700 ease-out touch-manipulation cursor-pointer"
               style={{ filter: 'drop-shadow(0px 12px 24px rgba(0,0,0,0.6))' }}
             >
               {/* District Paths */}
@@ -629,6 +727,11 @@ export default function LandingPage() {
                 />
               ))}
             </svg>
+
+            {/* Mobile Touch Hint Badge */}
+            <div className="mt-2 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#17352A]/80 border border-[#B87932]/30 text-[10px] font-mono text-[#F5F1E7]/80 lg:hidden">
+              <span>👆 Tap any district on map to view Mandals & Villages</span>
+            </div>
 
             {/* Hover Tooltip Overlay */}
             {hoveredDistrict && (
@@ -1157,20 +1260,20 @@ export default function LandingPage() {
       </footer>
       {/* Dynamic Pop-up Modal Wizard */}
       {isNavigationModalOpen && (
-        <div className="fixed inset-0 bg-[#17352A]/40 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-fade-in">
-          <div className="bg-[#F5F1E7] border border-[#17352A]/15 w-full max-w-2xl rounded-3xl p-6 shadow-2xl relative flex flex-col max-h-[85vh] animate-fade-in-up">
+        <div className="fixed inset-0 bg-[#17352A]/60 backdrop-blur-md z-50 flex items-center justify-center p-2 sm:p-4 animate-fade-in">
+          <div className="bg-[#F5F1E7] border border-[#17352A]/15 w-full max-w-2xl rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-2xl relative flex flex-col max-h-[92vh] sm:max-h-[85vh] animate-fade-in-up">
             
             {/* Modal Header */}
-            <div className="flex justify-between items-start border-b border-[#17352A]/10 pb-4 mb-4">
-              <div className="flex flex-col gap-1">
-                <span className="text-[9px] font-mono font-bold text-[#B87932] uppercase tracking-wider">{wizardPurpose || "LGD Explorer"}</span>
-                <h3 className="font-heading font-black text-xl text-[#17352A]">
+            <div className="flex justify-between items-start border-b border-[#17352A]/10 pb-3 sm:pb-4 mb-3 sm:mb-4 gap-2">
+              <div className="flex flex-col gap-0.5 sm:gap-1 min-w-0">
+                <span className="text-[8px] sm:text-[9px] font-mono font-bold text-[#B87932] uppercase tracking-wider truncate">{wizardPurpose || "LGD Explorer"}</span>
+                <h3 className="font-heading font-black text-lg sm:text-xl text-[#17352A] truncate">
                   {modalSelectedDistrict ? `Explore ${modalSelectedDistrict.name}` : "Select District"}
                 </h3>
               </div>
               <button
                 onClick={() => handleCloseModal()}
-                className="text-xs font-mono font-bold text-[#5F7668] hover:text-[#B87932] border border-[#17352A]/10 hover:border-[#B87932]/30 bg-white px-3 py-1.5 rounded-lg transition-colors shadow-sm"
+                className="text-xs font-mono font-bold text-[#5F7668] hover:text-[#B87932] border border-[#17352A]/10 hover:border-[#B87932]/30 bg-white px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg transition-colors shadow-sm cursor-pointer shrink-0"
               >
                 Close (ESC)
               </button>
@@ -1178,13 +1281,13 @@ export default function LandingPage() {
 
             {/* Breadcrumb Path in Modal */}
             {modalSelectedDistrict && (
-              <div className="flex flex-wrap items-center gap-1.5 text-[10px] text-[#5F7668] bg-white border border-[#17352A]/5 px-3.5 py-2 rounded-xl font-mono mb-4">
+              <div className="flex flex-wrap items-center gap-1.5 text-[10px] text-[#5F7668] bg-white border border-[#17352A]/5 px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-xl font-mono mb-3 sm:mb-4">
                 <button 
                   onClick={() => {
                     setModalSelectedMandal(null);
                     setModalVillagesList([]);
                   }}
-                  className="hover:text-[#B87932] transition-colors"
+                  className="hover:text-[#B87932] transition-colors cursor-pointer"
                 >
                   {modalSelectedDistrict.name}
                 </button>
@@ -1199,7 +1302,7 @@ export default function LandingPage() {
 
             {/* Loading Indicator */}
             {modalLoading ? (
-              <div className="flex-grow flex flex-col items-center justify-center py-20 text-[#B87932]">
+              <div className="flex-grow flex flex-col items-center justify-center py-16 sm:py-20 text-[#B87932]">
                 <div className="w-8 h-8 rounded-full border-2 border-current border-t-transparent animate-spin mb-4" />
                 <span className="text-xs font-mono">Loading dynamic LGD registries...</span>
               </div>
@@ -1210,14 +1313,14 @@ export default function LandingPage() {
                 {!modalSelectedDistrict && (
                   <div className="flex flex-col gap-3">
                     <span className="text-xs text-[#17352A]/50 font-medium">Select District to browse villages ({(dbDistricts.length > 0 ? dbDistricts : telanganaMapData.districts).length})</span>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
                       {(dbDistricts.length > 0 ? dbDistricts : telanganaMapData.districts).map((d) => (
                         <button
                           key={d.id || d.code}
                           onClick={() => {
                             openWizardForDistrict(d.name, d.id || d.code);
                           }}
-                          className="text-left p-3 bg-white hover:bg-[#EAE3D4] border border-[#17352A]/10 rounded-xl text-xs font-semibold text-[#17352A] hover:text-[#B87932] transition-all flex justify-between items-center group shadow-sm"
+                          className="text-left p-2.5 sm:p-3 bg-white hover:bg-[#EAE3D4] border border-[#17352A]/10 rounded-xl text-xs font-semibold text-[#17352A] hover:text-[#B87932] transition-all flex justify-between items-center group shadow-sm cursor-pointer"
                         >
                           <span className="truncate">{d.name}</span>
                           <ArrowRight className="w-3.5 h-3.5 text-[#17352A]/20 group-hover:text-[#B87932] group-hover:translate-x-0.5 transition-all shrink-0" />
@@ -1234,23 +1337,27 @@ export default function LandingPage() {
                     {(() => {
                       const col = getDistrictCollector(modalSelectedDistrict.name);
                       return col ? (
-                        <div className="p-3 bg-white/90 border border-[#17352A]/10 rounded-2xl flex items-center justify-between gap-3 shadow-2xs">
-                          <div className="flex items-center gap-2.5">
-                            <div className="w-8 h-8 rounded-xl bg-[#B87932]/10 text-[#B87932] flex items-center justify-center font-bold text-xs font-mono">
+                        <div className="p-3 bg-white/90 border border-[#17352A]/10 rounded-xl sm:rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 sm:gap-3 shadow-2xs">
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <div className="w-8 h-8 rounded-xl bg-[#B87932]/10 text-[#B87932] flex items-center justify-center font-bold text-xs font-mono shrink-0">
                               IAS
                             </div>
-                            <div>
-                              <div className="flex items-center gap-2">
-                                <span className="text-xs font-bold text-[#17352A]">{col.name}</span>
-                                <span className="text-[9px] font-mono font-bold bg-[#B87932] text-white px-1.5 py-0.2 rounded-xs">District Collector</span>
+                            <div className="min-w-0">
+                              <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                                <span className="text-xs font-bold text-[#17352A] truncate">{col.name}</span>
+                                <span className="text-[8px] sm:text-[9px] font-mono font-bold bg-[#B87932] text-white px-1.5 py-0.2 rounded-xs shrink-0">District Collector</span>
                               </div>
-                              <span className="text-[10px] text-[#5F7668] font-mono">{modalSelectedDistrict.name} District Administration</span>
+                              <span className="text-[10px] text-[#5F7668] font-mono block truncate">{modalSelectedDistrict.name} Administration</span>
                             </div>
                           </div>
                           {col.phone && (
-                            <span className="text-[11px] font-mono text-[#5F7668] hidden sm:inline">
-                              Office: {col.phone}
-                            </span>
+                            <a 
+                              href={`tel:${col.phone.split(',')[0].trim()}`}
+                              className="text-[10px] sm:text-[11px] font-mono text-[#B87932] font-semibold bg-[#B87932]/10 px-2.5 py-1 rounded-lg hover:bg-[#B87932]/20 transition-colors flex items-center gap-1 self-stretch sm:self-auto justify-center"
+                            >
+                              <Phone className="w-3 h-3" />
+                              <span>{col.phone}</span>
+                            </a>
                           )}
                         </div>
                       ) : null;

@@ -1,0 +1,13 @@
+services:
+  # Complete Telangana GRAM Governance Fullstack Web Application
+  - type: web
+    name: gram-governance
+    runtime: docker
+    plan: free
+    region: oregon
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: PORT
+        value: 8000
+      - key: SECRET_KEY
+        generateValue: true

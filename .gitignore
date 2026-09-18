@@ -4,6 +4,7 @@ frontend/node_modules/
 .env
 backend/.env
 *.db
+!backend/gram.db
 __pycache__/
 *.pyc
 .venv/

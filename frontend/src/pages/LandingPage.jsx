@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import api from '../api';
 import { telanganaMapData } from '../assets/telangana-districts';
+import { getDistrictCollector } from '../data/districtCollectors';
 
 // Helper for seeded random coordinates
 function getSeededRandom(seed) {
@@ -1201,6 +1202,32 @@ export default function LandingPage() {
                 {/* Flow Step 1: Select Mandal */}
                 {modalSelectedDistrict && !modalSelectedMandal && (
                   <div className="flex flex-col gap-3">
+                    {/* District Collector Information Card */}
+                    {(() => {
+                      const col = getDistrictCollector(modalSelectedDistrict.name);
+                      return col ? (
+                        <div className="p-3 bg-white/90 border border-[#17352A]/10 rounded-2xl flex items-center justify-between gap-3 shadow-2xs">
+                          <div className="flex items-center gap-2.5">
+                            <div className="w-8 h-8 rounded-xl bg-[#B87932]/10 text-[#B87932] flex items-center justify-center font-bold text-xs font-mono">
+                              IAS
+                            </div>
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs font-bold text-[#17352A]">{col.name}</span>
+                                <span className="text-[9px] font-mono font-bold bg-[#B87932] text-white px-1.5 py-0.2 rounded-xs">District Collector</span>
+                              </div>
+                              <span className="text-[10px] text-[#5F7668] font-mono">{modalSelectedDistrict.name} District Administration</span>
+                            </div>
+                          </div>
+                          {col.phone && (
+                            <span className="text-[11px] font-mono text-[#5F7668] hidden sm:inline">
+                              Office: {col.phone}
+                            </span>
+                          )}
+                        </div>
+                      ) : null;
+                    })()}
+
                     <span className="text-xs text-[#17352A]/50 font-medium">Select Mandal ({modalMandalsList.length})</span>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                       {modalMandalsList.map((m) => (

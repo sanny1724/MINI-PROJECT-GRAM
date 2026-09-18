@@ -1,11 +1,12 @@
-// src/components/OfficialAuditDossierModal.jsx
 import React from 'react';
 import { X, Printer, Download, CheckCircle, Shield, Building, QrCode } from 'lucide-react';
+import { getDistrictCollector } from '../data/districtCollectors';
 
 export default function OfficialAuditDossierModal({ isOpen, onClose, data, lang = 'en' }) {
   if (!isOpen || !data) return null;
 
   const { villageInfo, metrics, budgets, schemes, officials } = data;
+  const collector = villageInfo?.districtCollector || getDistrictCollector(villageInfo?.districtName);
   const budget = budgets?.[0] || { totalAllocation: 0, totalSpent: 0, infrastructureAlloc: 0, welfareAlloc: 0, year: '2025-26' };
   const verificationCode = `TS-PRRD-LGD-${villageInfo.code}-${new Date().getFullYear()}`;
 
@@ -71,6 +72,9 @@ export default function OfficialAuditDossierModal({ isOpen, onClose, data, lang 
               </span>
               <span className="bg-[#F5F1E7] border border-[#17352A]/10 px-3 py-1 rounded-lg">
                 <strong>District:</strong> {villageInfo.districtName}
+              </span>
+              <span className="bg-[#F5F1E7] border border-[#17352A]/10 px-3 py-1 rounded-lg">
+                <strong>Collector:</strong> {collector.name}
               </span>
               <span className="bg-[#F5F1E7] border border-[#17352A]/10 px-3 py-1 rounded-lg font-bold text-[#B87932]">
                 LGD Code: {villageInfo.code}
@@ -176,12 +180,22 @@ export default function OfficialAuditDossierModal({ isOpen, onClose, data, lang 
               </div>
             </div>
 
-            <div className="flex flex-col items-center md:items-end text-center md:text-right">
-              <div className="h-10 w-28 border-b-2 border-dashed border-[#17352A]/40 mb-1 flex items-end justify-center">
-                <span className="text-[10px] font-mono text-[#5F7668] italic font-semibold">Digitally Signed</span>
+            <div className="flex items-center gap-6">
+              <div className="flex flex-col items-center text-center">
+                <div className="h-10 w-28 border-b-2 border-dashed border-[#17352A]/40 mb-1 flex items-end justify-center">
+                  <span className="text-[10px] font-mono text-[#5F7668] italic font-semibold">Digitally Verified</span>
+                </div>
+                <span className="text-xs font-bold text-[#17352A]">{collector.name}</span>
+                <span className="text-[10px] font-mono text-[#5F7668]">{collector.designation}</span>
               </div>
-              <span className="text-xs font-bold text-[#17352A]">{officials?.[0]?.name || 'Gram Panchayat Secretary'}</span>
-              <span className="text-[10px] font-mono text-[#5F7668]">Authorized Signatory, Gram Sabha</span>
+
+              <div className="flex flex-col items-center text-center">
+                <div className="h-10 w-28 border-b-2 border-dashed border-[#17352A]/40 mb-1 flex items-end justify-center">
+                  <span className="text-[10px] font-mono text-[#5F7668] italic font-semibold">Digitally Signed</span>
+                </div>
+                <span className="text-xs font-bold text-[#17352A]">{officials?.[0]?.name || 'Gram Panchayat Secretary'}</span>
+                <span className="text-[10px] font-mono text-[#5F7668]">Authorized Signatory, Gram Sabha</span>
+              </div>
             </div>
           </div>
 

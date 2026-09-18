@@ -8,8 +8,16 @@ from app.models.geo import Mandal
 from app.models.user import RoleEnum
 from app.schemas.village import VillageCreate, VillageOut, OfficialCreate, OfficialOut
 from app.auth.deps import require_roles
+from app.core.district_collectors import get_district_collector, TELANGANA_DISTRICT_COLLECTORS
 
 router = APIRouter(prefix="/api/villages", tags=["villages"])
+
+
+@router.get("/collectors/all")
+def list_all_district_collectors():
+    """Returns official list of all 33 Telangana District Collectors (Source: telangana.gov.in)"""
+    return TELANGANA_DISTRICT_COLLECTORS
+
 
 
 def _village_out(v: Village) -> VillageOut:
@@ -92,11 +100,13 @@ def get_village_dashboard(village_id: int, db: Session = Depends(get_db)):
     district = mandal.district if mandal else None
     
     # 1. villageInfo
+    collector_info = get_district_collector(district.name if district else "Medak")
     village_info = {
         "name": village.name,
         "mandalName": mandal.name if mandal else "Unknown",
         "districtName": district.name if district else "Unknown",
-        "code": village.lgd_code or str(village.id)
+        "code": village.lgd_code or str(village.id),
+        "districtCollector": collector_info
     }
     
     # 2. metrics (Using AI engine computed risk)
@@ -143,6 +153,17 @@ def get_village_dashboard(village_id: int, db: Session = Depends(get_db)):
             {"id": 1, "name": "K. Rama Rao", "designation": "Sarpanch", "contact": "9848022338"},
             {"id": 2, "name": "M. Srinivas", "designation": "Panchayat Secretary", "contact": "9440392011"}
         ]
+    
+    # Prepend District Collector as primary district governance officer
+    officials_list.insert(0, {
+        "id": 100,
+        "name": collector_info["name"],
+        "designation": f"{collector_info['designation']} ({collector_info['district']})",
+        "cadre": "IAS",
+        "contact": collector_info["phone"] or "040-23454000",
+        "email": collector_info["email"],
+        "isCollector": True
+    })
         
     # 4. schemes (Dynamic from budgets table)
     from app.models.budget import Budget

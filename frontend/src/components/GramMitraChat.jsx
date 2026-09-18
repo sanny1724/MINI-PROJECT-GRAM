@@ -1,6 +1,6 @@
-// src/components/GramMitraChat.jsx
 import React, { useState, useRef, useEffect } from 'react';
 import { Bot, MessageSquare, X, Send, Sparkles, User, ArrowRight } from 'lucide-react';
+import { getDistrictCollector } from '../data/districtCollectors';
 
 export default function GramMitraChat({ data, lang, t, onOpenGrievanceForm }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -33,6 +33,7 @@ export default function GramMitraChat({ data, lang, t, onOpenGrievanceForm }) {
   const districtName = data?.villageInfo?.districtName || 'Medak';
   const devScore = data?.metrics?.developmentScore || 23;
   const sarpanchName = data?.officials?.[0]?.name || 'N. Raju Yadav';
+  const collector = data?.villageInfo?.districtCollector || getDistrictCollector(districtName);
   const budgetSpent = ((data?.budgets?.[0]?.totalSpent || 0) / 100000).toFixed(1);
   const budgetAlloc = ((data?.budgets?.[0]?.totalAllocation || 0) / 100000).toFixed(1);
 
@@ -49,7 +50,11 @@ export default function GramMitraChat({ data, lang, t, onOpenGrievanceForm }) {
       let botReply = '';
       const qLower = query.toLowerCase();
 
-      if (qLower.includes('score') || qLower.includes('స్కోరు') || qLower.includes('development') || qLower.includes('అభివృద్ధి')) {
+      if (qLower.includes('collector') || qLower.includes('కలెక్టర్') || qLower.includes('ias') || qLower.includes('డిస్ట్రిక్ట్ కలెక్టర్')) {
+        botReply = lang === 'te'
+          ? `${districtName} జిల్లా కలెక్టర్ మరియు జిల్లా మేజిస్ట్రేట్ ${collector.name} గారు. కార్యాలయ ఫోన్: ${collector.phone || '040-23454000'}, ఈమెయిల్: ${collector.email}.`
+          : `The District Collector & Magistrate of ${districtName} is ${collector.name} (${collector.cadre}). Office Phone: ${collector.phone || 'Available via Collectorate'}, Official Email: ${collector.email}.`;
+      } else if (qLower.includes('score') || qLower.includes('స్కోరు') || qLower.includes('development') || qLower.includes('అభివృద్ధి')) {
         botReply = lang === 'te'
           ? `${villageName} గ్రామ అభివృద్ధి సూచిక స్కోరు 100 కి గాను ${devScore}. ఇందులో తాగునీరు 15/100, ఆరోగ్యం 36/100 మరియు వ్యవసాయం 90/100 వద్ద ఉన్నాయి.`
           : `${villageName}'s overall Development Index is ${devScore}/100. Key sector breakdown: Agriculture 90/100, Health 36/100, and Water 15/100.`;

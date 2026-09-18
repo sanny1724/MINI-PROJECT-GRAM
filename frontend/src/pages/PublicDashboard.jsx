@@ -8,7 +8,7 @@ import {
   Phone, Plus, CheckCircle, AlertTriangle, AlertCircle, Clock, 
   Paperclip, Globe, Mic, MicOff, ThumbsUp, Star, ShieldCheck, 
   MessageSquare, ExternalLink, Printer, CheckCircle2, Award, 
-  Sparkles, Vote, Trophy
+  Sparkles, Vote, Trophy, Mail, Search
 } from 'lucide-react';
 import api from '../api';
 import { toast } from 'react-toastify';
@@ -21,6 +21,8 @@ import ParticipatoryBudgetPoll from '../components/ParticipatoryBudgetPoll';
 import AIPredictiveSimulator from '../components/AIPredictiveSimulator';
 import VillageHallOfFame from '../components/VillageHallOfFame';
 import GramMitraChat from '../components/GramMitraChat';
+import DistrictCollectorsDirectoryModal from '../components/DistrictCollectorsDirectoryModal';
+import { getDistrictCollector } from '../data/districtCollectors';
 
 export default function PublicDashboard() {
   const { villageCode } = useParams();
@@ -59,6 +61,9 @@ export default function PublicDashboard() {
 
   // Mandal Benchmark Comparison Modal
   const [showComparisonModal, setShowComparisonModal] = useState(false);
+
+  // All 33 Telangana District Collectors Directory Modal
+  const [showAllCollectorsModal, setShowAllCollectorsModal] = useState(false);
 
   // Voice Recording state
   const [isRecording, setIsRecording] = useState(false);
@@ -331,6 +336,8 @@ export default function PublicDashboard() {
   }
 
   const { villageInfo, metrics, officials, schemes, budgets, grievances } = data;
+  const collector = villageInfo?.districtCollector || getDistrictCollector(villageInfo?.districtName);
+  const villageOfficials = officials?.filter(o => !o.isCollector && !o.designation?.toLowerCase().includes('collector')) || [];
   const budget = budgets?.[0] || { totalAllocation: 0, totalSpent: 0, infrastructureAlloc: 0, welfareAlloc: 0, year: '2025-26' };
   const spentPercent = budget.totalAllocation > 0 ? Math.round((budget.totalSpent / budget.totalAllocation) * 100) : 0;
 
@@ -438,10 +445,20 @@ export default function PublicDashboard() {
                   {t.publicDashboard}
                 </span>
               </div>
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-[#5F7668] mt-1 font-medium">
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-[#5F7668] mt-1.5 font-medium">
                 <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5 text-[#B87932]" /> {t.mandal}: {villageInfo.mandalName}</span>
                 <span className="flex items-center gap-1"><Building className="w-3.5 h-3.5 text-[#B87932]" /> {t.district}: {villageInfo.districtName}</span>
                 <span className="font-mono text-[#17352A]">{t.lgdCode}: {villageInfo.code}</span>
+                <button 
+                  onClick={() => setShowAllCollectorsModal(true)}
+                  className="inline-flex items-center gap-1.5 bg-white border border-[#17352A]/15 hover:border-[#B87932] px-2.5 py-0.5 rounded-full text-xs transition-all group cursor-pointer shadow-2xs hover:bg-[#F5F1E7]"
+                  title="Click to view full District Collectorate Directory"
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+                  <span className="text-[10px] font-mono font-bold uppercase text-[#5F7668]">Collector:</span>
+                  <span className="font-semibold text-[#17352A] group-hover:text-[#B87932]">{collector.name}</span>
+                  <span className="text-[9px] font-mono font-bold bg-[#B87932] text-white px-1.5 py-0.2 rounded-xs">IAS</span>
+                </button>
               </div>
             </div>
           </div>
@@ -550,22 +567,74 @@ export default function PublicDashboard() {
             </p>
           </div>
 
-          {/* Local Officials Directory */}
+          {/* Local & District Officials Directory */}
           <div className="gov-card-static rounded-3xl p-6 flex flex-col gap-4">
-            <h3 className="font-heading font-bold text-lg text-[#17352A] border-b border-[#17352A]/10 pb-3">{t.officialsDirectory}</h3>
-            <div className="flex flex-col gap-4">
-              {officials.map(o => (
-                <div key={o.id} className="flex items-center justify-between border-b border-[#17352A]/5 last:border-b-0 pb-3 last:pb-0">
+            <div className="flex items-center justify-between border-b border-[#17352A]/10 pb-3">
+              <h3 className="font-heading font-bold text-lg text-[#17352A]">{t.officialsDirectory}</h3>
+              <button
+                onClick={() => setShowAllCollectorsModal(true)}
+                className="text-[11px] font-mono font-bold text-[#B87932] hover:underline flex items-center gap-1 cursor-pointer"
+                title="Open Statewide Directory of all 33 District Collectors"
+              >
+                <span>33 Collectors</span>
+              </button>
+            </div>
+
+            {/* Presiding District Collector Card */}
+            <div className="p-3.5 rounded-2xl bg-[#17352A]/5 border border-[#17352A]/10 flex flex-col gap-2">
+              <div className="flex items-center justify-between">
+                <span className="text-[9px] font-mono font-bold uppercase tracking-wider bg-[#B87932] text-white px-2 py-0.5 rounded-md">
+                  District Collector (IAS)
+                </span>
+                <span className="text-[10px] font-mono text-[#5F7668]">
+                  {villageInfo.districtName} District
+                </span>
+              </div>
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex flex-col">
+                  <h4 className="font-heading font-bold text-sm text-[#17352A]">{collector.name}</h4>
+                  <p className="text-[10px] text-[#5F7668] font-mono">{collector.designation}</p>
+                </div>
+                <div className="flex items-center gap-1.5 shrink-0">
+                  {collector.phone && (
+                    <a
+                      href={`tel:${collector.phone.split(',')[0].trim()}`}
+                      className="w-8 h-8 bg-white border border-[#17352A]/15 hover:border-[#B87932] rounded-lg flex items-center justify-center text-[#B87932] transition-colors"
+                      title={`Call Collector Office: ${collector.phone}`}
+                    >
+                      <Phone className="w-3.5 h-3.5" />
+                    </a>
+                  )}
+                  {collector.email && (
+                    <a
+                      href={`mailto:${collector.email}`}
+                      className="w-8 h-8 bg-[#17352A] hover:bg-[#17352A]/90 rounded-lg flex items-center justify-center text-white transition-colors"
+                      title={`Email Collector: ${collector.email}`}
+                    >
+                      <Mail className="w-3.5 h-3.5 text-[#B87932]" />
+                    </a>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Panchayat Level Officers */}
+            <div className="flex flex-col gap-3 pt-1">
+              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#5F7668]">
+                Gram Panchayat Administration
+              </span>
+              {villageOfficials.map(o => (
+                <div key={o.id} className="flex items-center justify-between border-b border-[#17352A]/5 last:border-b-0 pb-2.5 last:pb-0">
                   <div className="flex flex-col">
                     <span className="text-sm font-semibold text-[#17352A]">{o.name}</span>
                     <span className="text-[10px] text-[#B87932] font-mono uppercase tracking-wider font-bold">{o.designation}</span>
                   </div>
                   <a 
                     href={`tel:${o.contact}`} 
-                    className="w-9 h-9 bg-[#F5F1E7] hover:bg-[#B87932]/10 border border-[#17352A]/10 hover:border-[#B87932] rounded-lg flex items-center justify-center text-[#B87932] transition-colors"
+                    className="w-8 h-8 bg-[#F5F1E7] hover:bg-[#B87932]/10 border border-[#17352A]/10 hover:border-[#B87932] rounded-lg flex items-center justify-center text-[#B87932] transition-colors"
                     title={`Call ${o.name}`}
                   >
-                    <Phone className="w-4 h-4" />
+                    <Phone className="w-3.5 h-3.5" />
                   </a>
                 </div>
               ))}
@@ -1267,6 +1336,14 @@ export default function PublicDashboard() {
           </div>
         </div>
       )}
+
+      {/* Feature: Official All 33 Telangana District Collectors Directory Modal */}
+      <DistrictCollectorsDirectoryModal
+        isOpen={showAllCollectorsModal}
+        onClose={() => setShowAllCollectorsModal(false)}
+        currentDistrict={villageInfo?.districtName}
+        lang={lang}
+      />
 
     </div>
   );
